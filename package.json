@@ -11,7 +11,8 @@
     "build": "eve build",
     "dev": "eve dev",
     "start": "eve start",
-    "typecheck": "tsgo"
+    "typecheck": "tsgo",
+    "discord:register": "node --env-file=.env scripts/register-commands.ts"
   },
   "dependencies": {
     "@openrouter/ai-sdk-provider": "^2.9.1",
