@@ -8,12 +8,7 @@ const OWNER = "michaelholley";
 export default defineTool({
   description:
     `Create a new GitHub issue in one of ${OWNER}'s repositories. ` +
-    `Only repos owned by '${OWNER}' can be targeted. ` +
-    "Keep issues short: write a one-sentence Summary (what + impact), " +
-    "a Details section (bug: steps/expected/actual; feature: problem/proposed), " +
-    "and optional Context (logs, links). Use `code` and fenced blocks. " +
-    "Neutral, factual tone. Omit greetings, filler, speculation, and empty " +
-    "sections. Target under ~12 lines.",
+    `Only repos owned by '${OWNER}' can be targeted.`,
   inputSchema: z.object({
     repo: z.string().min(1).describe("Repository name, e.g. 'mike'"),
     title: z.string().min(1).describe("Issue title"),
