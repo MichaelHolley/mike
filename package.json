@@ -15,10 +15,10 @@
     "discord:register": "node --env-file=.env scripts/register-commands.ts"
   },
   "dependencies": {
-    "@openrouter/ai-sdk-provider": "^2.9.1",
+    "@openrouter/ai-sdk-provider": "^2.10.0",
     "@vercel/connect": "0.2.2",
     "ai": "7.0.0-beta.178",
-    "eve": "^0.11.5",
+    "eve": "^0.11.10",
     "octokit": "^5.0.5",
     "zod": "4.4.3"
   },

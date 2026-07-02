@@ -9,17 +9,17 @@ importers:
   .:
     dependencies:
       '@openrouter/ai-sdk-provider':
-        specifier: ^2.9.1
-        version: 2.9.1(ai@7.0.0-beta.178(zod@4.4.3))(zod@4.4.3)
+        specifier: ^2.10.0
+        version: 2.10.0(ai@7.0.0-beta.178(zod@4.4.3))(zod@4.4.3)
       '@vercel/connect':
         specifier: 0.2.2
-        version: 0.2.2(ai@7.0.0-beta.178(zod@4.4.3))(eve@0.11.5(ai@7.0.0-beta.178(zod@4.4.3)))
+        version: 0.2.2(ai@7.0.0-beta.178(zod@4.4.3))(eve@0.11.10(ai@7.0.0-beta.178(zod@4.4.3)))
       ai:
         specifier: 7.0.0-beta.178
         version: 7.0.0-beta.178(zod@4.4.3)
       eve:
-        specifier: ^0.11.5
-        version: 0.11.5(ai@7.0.0-beta.178(zod@4.4.3))
+        specifier: ^0.11.10
+        version: 0.11.10(ai@7.0.0-beta.178(zod@4.4.3))
       octokit:
         specifier: ^5.0.5
         version: 5.0.5
@@ -174,8 +174,8 @@ packages:
     resolution: {integrity: sha512-da6KbdNCV5sr1/txD896V+6W0iamFWrvVl8cHkBSPT+YlvmT3DwXa4jxZnQc+gnuTEqSWbBeoSZYTayXH9wXcw==}
     engines: {node: '>= 20'}
 
-  '@openrouter/ai-sdk-provider@2.9.1':
-    resolution: {integrity: sha512-okgq07Vdkro4CB5INbfhwa0e6VR1HS7sidNcfHN/MeXLJvX1JmQCff/vem6tcxwT9r1avyFrXSlfv9B28D/Pag==}
+  '@openrouter/ai-sdk-provider@2.10.0':
+    resolution: {integrity: sha512-FMsAEjLUt5pWuRE2LDC/LCvVrFjLlrEzUITH5+5SZtfq7KZ2wrOHjQVxzz92sju8S9ltpzW87CLW8/b0oBXVCw==}
     engines: {node: '>=18'}
     peerDependencies:
       ai: ^6.0.0
@@ -452,8 +452,8 @@ packages:
       wrangler:
         optional: true
 
-  eve@0.11.5:
-    resolution: {integrity: sha512-GDAgrJEuvA0JfT53uHyo0TqBnBOKDQEXGKdfBmqjOEOw0hgvTAFE+P8TzTXiKnnOuyXhEceQmGagn89s/vYKnQ==}
+  eve@0.11.10:
+    resolution: {integrity: sha512-vMjqknf+8pSL4kpm8uQI6N1r7KcLDqJuouN6updVqELlfWU7ndVNJ5rxBagM8C202owuh5JtCVnnxyHEz7EPFA==}
     engines: {node: '>=24'}
     hasBin: true
     peerDependencies:
@@ -949,7 +949,7 @@ snapshots:
       '@octokit/request-error': 7.1.0
       '@octokit/webhooks-methods': 6.0.0
 
-  '@openrouter/ai-sdk-provider@2.9.1(ai@7.0.0-beta.178(zod@4.4.3))(zod@4.4.3)':
+  '@openrouter/ai-sdk-provider@2.10.0(ai@7.0.0-beta.178(zod@4.4.3))(zod@4.4.3)':
     dependencies:
       ai: 7.0.0-beta.178(zod@4.4.3)
       zod: 4.4.3
@@ -1060,12 +1060,12 @@ snapshots:
     dependencies:
       execa: 5.1.1
 
-  '@vercel/connect@0.2.2(ai@7.0.0-beta.178(zod@4.4.3))(eve@0.11.5(ai@7.0.0-beta.178(zod@4.4.3)))':
+  '@vercel/connect@0.2.2(ai@7.0.0-beta.178(zod@4.4.3))(eve@0.11.10(ai@7.0.0-beta.178(zod@4.4.3)))':
     dependencies:
       '@vercel/oidc': 3.6.1
     optionalDependencies:
       ai: 7.0.0-beta.178(zod@4.4.3)
-      eve: 0.11.5(ai@7.0.0-beta.178(zod@4.4.3))
+      eve: 0.11.10(ai@7.0.0-beta.178(zod@4.4.3))
 
   '@vercel/oidc@3.2.0': {}
 
@@ -1111,7 +1111,7 @@ snapshots:
       httpxy: 0.5.3
       srvx: 0.11.16
 
-  eve@0.11.5(ai@7.0.0-beta.178(zod@4.4.3)):
+  eve@0.11.10(ai@7.0.0-beta.178(zod@4.4.3)):
     dependencies:
       ai: 7.0.0-beta.178(zod@4.4.3)
       nitro: 3.0.260610-beta
