@@ -1,16 +1,21 @@
 import { defineTool } from "eve/tools";
 import { Octokit } from "octokit";
 import { z } from "zod";
-
-// Hard-locked owner. Issues can only ever be created in this user's repos.
-const OWNER = "michaelholley";
+import { getOwner } from "../lib/get-owner.js";
+import { normalizeRepo } from "../lib/normalize-repo.js";
 
 export default defineTool({
   description:
-    `Create a new GitHub issue in one of ${OWNER}'s repositories. ` +
-    `Only repos owned by '${OWNER}' can be targeted.`,
+    `Create a new GitHub issue in one of ${getOwner()}'s repositories. ` +
+    `Only repos owned by '${getOwner()}' can be targeted.`,
   inputSchema: z.object({
-    repo: z.string().min(1).describe("Repository name, e.g. 'mike'"),
+    repo: z
+      .string()
+      .min(1)
+      .describe(
+        `Repository name only, without the owner, e.g. 'mike'. The owner ` +
+          `is always '${getOwner()}' — do not prefix it.`,
+      ),
     title: z.string().min(1).describe("Issue title"),
     body: z
       .string()
@@ -43,8 +48,8 @@ export default defineTool({
     const octokit = new Octokit({ auth: token });
 
     const { data } = await octokit.rest.issues.create({
-      owner: OWNER,
-      repo,
+      owner: getOwner(),
+      repo: normalizeRepo(repo),
       title,
       body,
       labels,
