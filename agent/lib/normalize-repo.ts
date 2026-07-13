@@ -34,10 +34,11 @@ export function normalizeRepo(repo: string) {
   }
 
   const [owner, repoName] = parts;
-  if (!owner || !repoName) {
-    throw new Error(
-      `Invalid repo "${repo}": both the owner and repo name must be non-empty.`,
-    );
+  if (!owner) {
+    throw new Error(`Invalid repo "${repo}": owner cannot be empty.`);
+  }
+  if (!repoName) {
+    throw new Error(`Invalid repo "${repo}": repo name cannot be empty.`);
   }
 
   if (owner.toLowerCase() !== getOwner().toLowerCase()) {
