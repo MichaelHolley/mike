@@ -14,7 +14,8 @@ export default defineTool({
       .min(1)
       .describe(
         `Repository name only, without the owner, e.g. 'mike'. The owner ` +
-          `is always '${getOwner()}' — do not prefix it.`,
+          `is always '${getOwner()}' — do not prefix it. If prefixed, it ` +
+          `must match '${getOwner()}' or the call is rejected.`,
       ),
     title: z.string().min(1).describe("Issue title"),
     body: z
