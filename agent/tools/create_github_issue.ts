@@ -27,20 +27,15 @@ export default defineTool({
           "feature: problem, proposed), optional '## Context' (logs/links). " +
           "Omit any section with no content — do not emit empty headings or " +
           "placeholders. Use `code` for identifiers/paths and fenced blocks " +
-          "for logs. No greetings or filler. Keep it under ~12 lines.",
+          "for logs. No greetings or filler. Keep it to 24 lines or fewer.",
       ),
-    labels: z.array(z.string()).optional().describe("Labels to apply"),
-    assignees: z
-      .array(z.string())
-      .optional()
-      .describe("GitHub usernames to assign"),
   }),
   outputSchema: z.object({
     number: z.number(),
     url: z.string(),
     title: z.string(),
   }),
-  async execute({ repo, title, body, labels, assignees }) {
+  async execute({ repo, title, body }) {
     const token = process.env.GITHUB_TOKEN;
     if (!token) {
       throw new Error("GITHUB_TOKEN is not set in the environment.");
@@ -53,8 +48,6 @@ export default defineTool({
       repo: normalizeRepo(repo),
       title,
       body,
-      labels,
-      assignees,
     });
 
     return {
