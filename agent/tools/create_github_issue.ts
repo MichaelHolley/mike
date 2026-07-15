@@ -1,7 +1,7 @@
 import { defineTool } from "eve/tools";
-import { Octokit } from "octokit";
 import { z } from "zod";
 import { getOwner } from "../lib/get-owner.js";
+import { createOctokit } from "../lib/octokit.js";
 import { normalizeRepo } from "../lib/normalize-repo.js";
 
 export default defineTool({
@@ -36,12 +36,7 @@ export default defineTool({
     title: z.string(),
   }),
   async execute({ repo, title, body }) {
-    const token = process.env.GITHUB_TOKEN;
-    if (!token) {
-      throw new Error("GITHUB_TOKEN is not set in the environment.");
-    }
-
-    const octokit = new Octokit({ auth: token });
+    const octokit = createOctokit();
 
     const { data } = await octokit.rest.issues.create({
       owner: getOwner(),
