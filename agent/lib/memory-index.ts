@@ -1,7 +1,7 @@
 import { getBlob, putBlob } from "./blob-bunny.js";
-import { MEMORY_PREFIX } from "./memory-path.js";
+import { MEMORY_INDEX_NAME, MEMORY_PREFIX } from "./memory-path.js";
 
-const INDEX_PATH = `${MEMORY_PREFIX}MEMORY.md`;
+const INDEX_PATH = `${MEMORY_PREFIX}${MEMORY_INDEX_NAME}.md`;
 
 const INDEX_HEADER = `# Memory Index
 

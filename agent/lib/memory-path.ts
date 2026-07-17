@@ -1,5 +1,8 @@
 export const MEMORY_PREFIX = "memory/";
 
+/** Basename of the auto-maintained map; reserved, never a normal memory. */
+export const MEMORY_INDEX_NAME = "MEMORY";
+
 const SLUG_SEGMENT = "[a-zA-Z0-9_-]+";
 const SLUG_REGEX = new RegExp(`^${SLUG_SEGMENT}(?:/${SLUG_SEGMENT})*$`);
 
@@ -26,6 +29,15 @@ export function canonicalMemoryName(name: string): string {
     throw new Error(
       `Invalid memory name "${name}": use letters, numbers, dashes, ` +
         `underscores, and "/" to nest — no dots, spaces, or leading "/".`,
+    );
+  }
+
+  // Reject any name that resolves to the index file (case-insensitive, since
+  // the backing store may be case-insensitive), so a memory can never clobber
+  // the map. Compared against the whole slug — a nested `foo/MEMORY` is fine.
+  if (slug.toLowerCase() === MEMORY_INDEX_NAME.toLowerCase()) {
+    throw new Error(
+      `"${name}" is reserved for the memory index. Choose a different name.`,
     );
   }
 
