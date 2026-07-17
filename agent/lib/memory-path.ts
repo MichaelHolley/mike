@@ -4,17 +4,18 @@ const SLUG_SEGMENT = "[a-zA-Z0-9_-]+";
 const SLUG_REGEX = new RegExp(`^${SLUG_SEGMENT}(?:/${SLUG_SEGMENT})*$`);
 
 /**
- * Turn an agent-supplied memory name into its blob-bunny path.
+ * Canonicalize an agent-supplied memory name to its bare slug.
  *
- * The agent passes a bare slug (e.g. `user-preferences`); this owns the
- * `memory/` prefix and `.md` extension so the agent can never produce a path
- * blob-bunny rejects. A stray prefix or extension is stripped first, so
- * `memory/user-preferences.md` and `user-preferences` both resolve the same.
+ * The agent passes a bare slug (e.g. `user-preferences`), but a stray
+ * `memory/` prefix or `.md` extension is stripped first, so
+ * `memory/user-preferences.md` and `user-preferences` resolve to the same
+ * slug. Callers must key both the blob and the index entry off this one value
+ * so they never desync.
  *
  * @throws If the slug contains anything outside letters, numbers, dashes,
  *   underscores, and `/` segment separators.
  */
-export function toMemoryPath(name: string): string {
+export function canonicalMemoryName(name: string): string {
   const slug = name
     .trim()
     .replace(/^\/+/, "")
@@ -28,5 +29,10 @@ export function toMemoryPath(name: string): string {
     );
   }
 
-  return `${MEMORY_PREFIX}${slug}.md`;
+  return slug;
+}
+
+/** Blob-bunny path for a memory. The agent never sees this. */
+export function toMemoryPath(name: string): string {
+  return `${MEMORY_PREFIX}${canonicalMemoryName(name)}.md`;
 }

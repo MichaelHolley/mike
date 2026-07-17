@@ -1,7 +1,7 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 import { putBlob } from "../lib/blob-bunny.js";
-import { toMemoryPath } from "../lib/memory-path.js";
+import { canonicalMemoryName, toMemoryPath } from "../lib/memory-path.js";
 import { upsertMemoryIndexEntry } from "../lib/memory-index.js";
 
 export default defineTool({
@@ -38,9 +38,10 @@ export default defineTool({
     name: z.string(),
   }),
   async execute({ name, description, content }) {
-    await putBlob(toMemoryPath(name), content);
-    await upsertMemoryIndexEntry(name, description);
-    return { name };
+    const slug = canonicalMemoryName(name);
+    await putBlob(toMemoryPath(slug), content);
+    await upsertMemoryIndexEntry(slug, description);
+    return { name: slug };
   },
   toModelOutput(output) {
     return { type: "text", value: `Saved memory "${output.name}".` };

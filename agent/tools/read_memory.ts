@@ -1,7 +1,7 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 import { getBlob } from "../lib/blob-bunny.js";
-import { toMemoryPath } from "../lib/memory-path.js";
+import { canonicalMemoryName, toMemoryPath } from "../lib/memory-path.js";
 
 export default defineTool({
   description:
@@ -21,8 +21,9 @@ export default defineTool({
     content: z.string().nullable(),
   }),
   async execute({ name }) {
-    const content = await getBlob(toMemoryPath(name));
-    return { name, content };
+    const slug = canonicalMemoryName(name);
+    const content = await getBlob(toMemoryPath(slug));
+    return { name: slug, content };
   },
   toModelOutput(output) {
     if (output.content === null) {

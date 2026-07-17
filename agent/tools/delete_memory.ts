@@ -1,7 +1,7 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 import { deleteBlob } from "../lib/blob-bunny.js";
-import { toMemoryPath } from "../lib/memory-path.js";
+import { canonicalMemoryName, toMemoryPath } from "../lib/memory-path.js";
 import { removeMemoryIndexEntry } from "../lib/memory-index.js";
 
 export default defineTool({
@@ -22,11 +22,12 @@ export default defineTool({
     deleted: z.boolean(),
   }),
   async execute({ name }) {
-    const deleted = await deleteBlob(toMemoryPath(name));
-    if (deleted) {
-      await removeMemoryIndexEntry(name);
-    }
-    return { name, deleted };
+    const slug = canonicalMemoryName(name);
+    // Prune the index unconditionally so a stale entry whose blob is already
+    // gone (404) still gets reconciled out of the map.
+    const deleted = await deleteBlob(toMemoryPath(slug));
+    await removeMemoryIndexEntry(slug);
+    return { name: slug, deleted };
   },
   toModelOutput(output) {
     return {
