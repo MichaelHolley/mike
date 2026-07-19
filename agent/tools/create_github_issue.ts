@@ -29,13 +29,20 @@ export default defineTool({
           "placeholders. Use `code` for identifiers/paths and fenced blocks " +
           "for logs. No greetings or filler. Keep it to 24 lines or fewer.",
       ),
+    labels: z
+      .array(z.string())
+      .optional()
+      .describe(
+        "Labels to apply to the issue. Only set these if the user " +
+          "explicitly asks for labels — leave unset by default.",
+      ),
   }),
   outputSchema: z.object({
     number: z.number(),
     url: z.string(),
     title: z.string(),
   }),
-  async execute({ repo, title, body }) {
+  async execute({ repo, title, body, labels }) {
     const octokit = createOctokit();
 
     const { data } = await octokit.rest.issues.create({
@@ -43,6 +50,7 @@ export default defineTool({
       repo: normalizeRepo(repo),
       title,
       body,
+      labels,
     });
 
     return {
