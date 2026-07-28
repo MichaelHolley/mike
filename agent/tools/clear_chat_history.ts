@@ -1,6 +1,6 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
-import { clearHistory, historyChannelIdFromAuth } from "../lib/chat-history.js";
+import { clearHistory, historyChannelId } from "../lib/chat-history.js";
 
 export default defineTool({
   description:
@@ -13,7 +13,7 @@ export default defineTool({
     cleared: z.boolean(),
   }),
   async execute(_input, ctx) {
-    const channelId = historyChannelIdFromAuth(ctx.session.auth.current);
+    const channelId = historyChannelId(ctx.session.auth.current);
     if (!channelId) return { supported: false, cleared: false };
     return { supported: true, cleared: await clearHistory(channelId) };
   },

@@ -2,13 +2,12 @@ import { deleteBlob, getBlob, putBlob } from "./blob-bunny.js";
 
 const HISTORY_PREFIX = "history/";
 
-/** eve adapter kind. Only Discord records history — other channels carry durable sessions. */
+/** Storage namespace. Only Discord records history — other channels carry durable sessions. */
 const HISTORY_CHANNEL_KIND = "discord";
 
 /**
- * Must match the `authenticator` set in `agent/channels/discord.ts`. Tool
- * executors get no channel handle, so this is the only gate they can apply;
- * changing it there without changing it here silently disables the feature.
+ * Must match the `authenticator` set in `agent/channels/discord.ts`; changing
+ * it there without changing it here silently disables the feature.
  */
 const DISCORD_AUTHENTICATOR = "discord";
 
@@ -78,20 +77,15 @@ ${JSON.stringify(entries, null, 2)}
 }
 
 /**
- * Resolve the channel from verified auth alone, for callers without a channel
- * handle (tool executors), so the model cannot target another channel.
+ * Resolved from verified auth alone, never from a channel handle: the
+ * authenticator identifies Discord, and the model cannot target another
+ * channel. `ctx.channel.kind` is unusable as a gate — eve rewrites a stateful
+ * adapter's kind to `channel:<file basename>`, so it never equals "discord".
  */
-export function historyChannelIdFromAuth(auth: HistoryAuth | null): string | null {
+export function historyChannelId(auth: HistoryAuth | null): string | null {
   if (auth?.authenticator !== DISCORD_AUTHENTICATOR) return null;
   const channelId = auth.attributes.channel_id;
   return typeof channelId === "string" && channelId.length > 0 ? channelId : null;
-}
-
-export function historyChannelId(
-  channelKind: string | undefined,
-  auth: HistoryAuth | null,
-): string | null {
-  return channelKind === HISTORY_CHANNEL_KIND ? historyChannelIdFromAuth(auth) : null;
 }
 
 export function speakerName(auth: HistoryAuth | null): string {
