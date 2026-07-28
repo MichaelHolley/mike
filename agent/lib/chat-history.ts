@@ -54,8 +54,14 @@ function isEntry(value: unknown): value is ChatHistoryEntry {
 async function readEntries(path: string): Promise<ChatHistoryEntry[]> {
   const content = await getBlob(path);
   if (!content) return [];
-  const parsed: unknown = JSON.parse(content);
-  return Array.isArray(parsed) ? parsed.filter(isEntry) : [];
+  try {
+    const parsed: unknown = JSON.parse(content);
+    return Array.isArray(parsed) ? parsed.filter(isEntry) : [];
+  } catch {
+    // Treat a corrupt blob as empty so the next write overwrites it. Rethrowing
+    // would strand the channel: writes read first, so they would fail forever.
+    return [];
+  }
 }
 
 function render(entries: readonly ChatHistoryEntry[]): string {
@@ -112,11 +118,7 @@ export async function recordEntry(
   }
 }
 
-/**
- * Renders the entries newer than {@link MAX_ENTRY_AGE_MS} for injection into
- * the model's context, or null when there is nothing usable to replay.
- * Best-effort: a storage outage yields no block rather than failing the turn.
- */
+/** Best-effort: a storage outage yields no block rather than failing the turn. */
 export async function loadHistoryBlock(channelId: string): Promise<string | null> {
   try {
     const cutoff = Date.now() - MAX_ENTRY_AGE_MS;

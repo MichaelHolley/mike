@@ -46,7 +46,7 @@ Discord has no durable session per channel, so each `/mike` command would otherw
 
 All logic lives in `agent/lib/chat-history.ts`; the hook, instructions, and tool are thin adapters. Retention is set by exported constants there: newest **20** entries, each clamped to **2000** characters on write, and entries older than **7 days** dropped on read.
 
-Storage is one blob per channel at `history/discord/<channel_id>.json`, holding a JSON array of `{ role, author, text, at }`. Reads and writes are best-effort: a blob-bunny outage is logged to stderr and the bot answers without memory rather than failing the turn.
+Storage is one blob per channel at `history/discord/<channel_id>.json`, holding a JSON array of `{ role, author, text, at }`. Same backend as memory, so the same `BLOB_BUNNY_URL` and `BLOB_BUNNY_TOKEN`. Reads and writes are best-effort: a blob-bunny outage is logged to stderr and the bot answers without memory rather than failing the turn.
 
 **Known limitation:** each turn does read-modify-write, and blob-bunny has no conditional writes. Two genuinely concurrent turns in the same channel will lose one turn's entries. Accepted — fixing it needs conditional writes upstream in blob-bunny.
 

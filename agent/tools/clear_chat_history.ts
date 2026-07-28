@@ -9,13 +9,18 @@ export default defineTool({
     "Always clears the channel it is called from — no other channel can be targeted.",
   inputSchema: z.object({}),
   outputSchema: z.object({
+    supported: z.boolean(),
     cleared: z.boolean(),
   }),
   async execute(_input, ctx) {
     const channelId = historyChannelIdFromAuth(ctx.session.auth.current);
-    return { cleared: channelId ? await clearHistory(channelId) : false };
+    if (!channelId) return { supported: false, cleared: false };
+    return { supported: true, cleared: await clearHistory(channelId) };
   },
   toModelOutput(output) {
+    if (!output.supported) {
+      return { type: "text", value: "Conversation history is only recorded on Discord." };
+    }
     return {
       type: "text",
       value: output.cleared
