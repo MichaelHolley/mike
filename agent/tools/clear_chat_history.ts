@@ -1,6 +1,6 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
-import { clearHistory, historyScopeFromAuth } from "../lib/chat-history.js";
+import { clearHistory, historyChannelIdFromAuth } from "../lib/chat-history.js";
 
 export default defineTool({
   description:
@@ -12,8 +12,8 @@ export default defineTool({
     cleared: z.boolean(),
   }),
   async execute(_input, ctx) {
-    const scope = historyScopeFromAuth(ctx.session.auth.current);
-    return { cleared: scope ? await clearHistory(scope) : false };
+    const channelId = historyChannelIdFromAuth(ctx.session.auth.current);
+    return { cleared: channelId ? await clearHistory(channelId) : false };
   },
   toModelOutput(output) {
     return {

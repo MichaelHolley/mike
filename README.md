@@ -40,7 +40,7 @@ Memory names are slugs (letters, numbers, dashes, underscores, `/` to nest); the
 
 Discord has no durable session per channel, so each `/mike` command would otherwise start blind. The runtime records both sides of every exchange and replays them on the next turn:
 
-- Written by `agent/hooks/chat-history.ts` on `message.received` (the user message) and on `message.completed` (the reply, skipping `tool-calls` turns so only what the user actually saw is stored).
+- Written by `agent/hooks/chat-history.ts` on `message.received` (the user message) and on `message.completed` (the reply, skipping `tool-calls` turns so only what the user actually saw is stored). The Discord channel's auth attributes carry the invoking `username`, so entries name their speaker.
 - Replayed by `agent/instructions/chat-history.ts` on `turn.started`, as a system block marked untrusted data.
 - Cleared by the `clear_chat_history` tool. It takes no arguments — the channel is resolved from verified auth, so a prompt injection cannot wipe another channel.
 

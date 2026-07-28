@@ -34,14 +34,10 @@ export async function getBlob(path: string): Promise<string | null> {
   return res.text();
 }
 
-export async function putBlob(
-  path: string,
-  content: string,
-  { filename = "memory.md", contentType = "text/markdown" } = {},
-): Promise<void> {
+export async function putBlob(path: string, content: string): Promise<void> {
   const { baseUrl, token } = getConfig();
   const form = new FormData();
-  form.append("file", new File([content], filename, { type: contentType }));
+  form.append("file", new File([content], "memory.md", { type: "text/markdown" }));
   const res = await fetch(blobUrl(baseUrl, path), {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
