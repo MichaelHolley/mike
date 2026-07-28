@@ -42,7 +42,7 @@ Discord has no durable session per channel, so each `/mike` command would otherw
 
 - Written by `agent/hooks/chat-history.ts` on `message.received` (the user message) and on `message.completed` (the reply, skipping `tool-calls` turns so only what the user actually saw is stored). The Discord channel's auth attributes carry the invoking `username`, so entries name their speaker.
 - Replayed by `agent/instructions/chat-history.ts` on `turn.started`, as a system block marked untrusted data.
-- Cleared by the `clear_chat_history` tool. It takes no arguments — the channel is resolved from verified auth, so a prompt injection cannot wipe another channel.
+- Cleared by the `clear_chat_history` tool. It takes no arguments — the channel is resolved from verified auth, so a prompt injection cannot wipe another channel. The confirmation reply is itself recorded, so a wipe leaves the channel holding that one agent entry.
 
 All logic lives in `agent/lib/chat-history.ts`; the hook, instructions, and tool are thin adapters. Retention is set by exported constants there: newest **20** entries, each clamped to **2000** characters on write, and entries older than **7 days** dropped on read.
 

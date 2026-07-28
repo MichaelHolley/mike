@@ -14,7 +14,7 @@ const DISCORD_AUTHENTICATOR = "discord";
 
 export const MAX_ENTRIES = 20;
 
-/** Discord's own message limit, so agent replies are already at or under it. */
+/** Discord's message limit. eve splits longer replies rather than capping them, so an over-long reply is stored truncated. */
 export const MAX_ENTRY_CHARS = 2000;
 
 export const MAX_ENTRY_AGE_MS = 7 * 24 * 60 * 60 * 1000;
