@@ -36,6 +36,20 @@ Persistent notes stored across conversations, backed by [blob-bunny](https://git
 
 Memory names are slugs (letters, numbers, dashes, underscores, `/` to nest); the map itself is auto-maintained at the reserved `MEMORY` name. Requires `BLOB_BUNNY_URL` and `BLOB_BUNNY_TOKEN`.
 
+### Chat history (Discord only)
+
+Discord has no durable session per channel, so each `/mike` command would otherwise start blind. The runtime records both sides of every exchange and replays them on the next turn:
+
+- Written by `agent/hooks/chat-history.ts` on `message.received` (the user message) and on `message.completed` (the reply, skipping `tool-calls` turns so only what the user actually saw is stored).
+- Replayed by `agent/instructions/chat-history.ts` on `turn.started`, as a system block marked untrusted data.
+- Cleared by the `clear_chat_history` tool. It takes no arguments — the channel is resolved from verified auth, so a prompt injection cannot wipe another channel.
+
+All logic lives in `agent/lib/chat-history.ts`; the hook, instructions, and tool are thin adapters. Retention is set by exported constants there: newest **20** entries, each clamped to **2000** characters on write, and entries older than **7 days** dropped on read.
+
+Storage is one blob per channel at `history/discord/<channel_id>.json`, holding a JSON array of `{ role, author, text, at }`. Reads and writes are best-effort: a blob-bunny outage is logged to stderr and the bot answers without memory rather than failing the turn.
+
+**Known limitation:** each turn does read-modify-write, and blob-bunny has no conditional writes. Two genuinely concurrent turns in the same channel will lose one turn's entries. Accepted — fixing it needs conditional writes upstream in blob-bunny.
+
 ## Register slash commands
 
 `scripts/register-commands.ts` registers the Discord slash commands (edit the `commands` array to change them). Each run `PUT`s, replacing the whole command set for that scope. Needs `DISCORD_APPLICATION_ID` + `DISCORD_BOT_TOKEN` (from `.env`).
