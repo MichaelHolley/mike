@@ -1,9 +1,9 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
-import { getOwner } from "../lib/get-owner.js";
-import { isNotFound } from "../lib/github-errors.js";
-import { createOctokit } from "../lib/octokit.js";
-import { normalizeRepo } from "../lib/normalize-repo.js";
+import { getOwner } from "../../lib/github/owner.js";
+import { isNotFound } from "../../lib/github/errors.js";
+import { createOctokit } from "../../lib/github/octokit.js";
+import { normalizeRepo } from "../../lib/github/normalize-repo.js";
 
 export default defineTool({
   description:

@@ -1,13 +1,13 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
-import { putBlob } from "../lib/blob-bunny.js";
-import { canonicalMemoryName, toMemoryPath } from "../lib/memory-path.js";
-import { upsertMemoryIndexEntry } from "../lib/memory-index.js";
+import { putBlob } from "../../lib/blob.js";
+import { canonicalMemoryName, toMemoryPath } from "../../lib/memory/path.js";
+import { upsertMemoryIndexEntry } from "../../lib/memory/index-map.js";
 
 export default defineTool({
   description:
     "Save a memory so it persists across conversations. Writing a name that " +
-    "already exists REPLACES it — to add to an existing memory, read_memory " +
+    "already exists REPLACES it — to add to an existing memory, memory-read " +
     "first and write back the full combined content. The memory map is " +
     "updated automatically.",
   inputSchema: z.object({

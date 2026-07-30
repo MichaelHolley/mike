@@ -1,4 +1,4 @@
-import { getOwner } from "./get-owner.js";
+import { getOwner } from "./owner.js";
 
 /**
  * Accept a bare repo name (`mike`) or a full `owner/repo` slug and return

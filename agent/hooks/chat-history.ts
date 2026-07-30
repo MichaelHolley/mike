@@ -1,5 +1,5 @@
 import { defineHook } from "eve/hooks";
-import { historyChannelId, recordEntry, speakerName } from "../lib/chat-history.js";
+import { historyChannelId, recordEntry, speakerName } from "../lib/chat/history.js";
 
 export default defineHook({
   events: {

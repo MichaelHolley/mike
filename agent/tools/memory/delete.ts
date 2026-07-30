@@ -1,8 +1,8 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
-import { deleteBlob } from "../lib/blob-bunny.js";
-import { canonicalMemoryName, toMemoryPath } from "../lib/memory-path.js";
-import { removeMemoryIndexEntry } from "../lib/memory-index.js";
+import { deleteBlob } from "../../lib/blob.js";
+import { canonicalMemoryName, toMemoryPath } from "../../lib/memory/path.js";
+import { removeMemoryIndexEntry } from "../../lib/memory/index-map.js";
 
 export default defineTool({
   description:
@@ -13,7 +13,7 @@ export default defineTool({
       .string()
       .min(1)
       .describe(
-        "Memory name as shown by list_memory, e.g. 'user-preferences'. Do " +
+        "Memory name as shown by memory-list, e.g. 'user-preferences'. Do " +
           "not include the 'memory/' prefix or the '.md' extension.",
       ),
   }),
