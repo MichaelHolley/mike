@@ -64,17 +64,12 @@ export default defineTool({
     } catch (error) {
       if (!isNotFound(error)) throw error;
 
-      // A 404 covers both "no such repo" and "no such issue" — tell them
-      // apart so the model does not retry the wrong half of the input.
-      const repoExists = await octokit.rest.repos
-        .get({ owner, repo: repoName })
-        .then(() => true)
-        .catch(() => false);
-
+      // GitHub answers 404 for a missing issue, a missing repo, and a repo
+      // the token cannot see, without distinguishing them. A probe of the
+      // repo cannot separate the last two either, so report the union.
       throw new Error(
-        repoExists
-          ? `Issue #${number} does not exist in "${owner}/${repoName}".`
-          : `Repository "${owner}/${repoName}" does not exist or is not accessible.`,
+        `Cannot read issue #${number} in "${owner}/${repoName}": the issue ` +
+          `or the repository does not exist, or the token cannot access it.`,
       );
     }
 
