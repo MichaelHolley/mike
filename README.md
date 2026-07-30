@@ -18,23 +18,23 @@ pnpm build && vercel deploy --prod
 
 ## Tools
 
-### GitHub (`agent/tools/`)
+### GitHub (`agent/tools/github/`)
 
-- `create_github_issue` — create an issue (title, body, optional labels).
-- `list_github_issues` — list issues, filterable by state, labels, and assignee.
-- `read_github_issue` — read one issue by number, including its full body.
-- `edit_github_issue` — update an existing issue's title and/or body.
+- `github-create_issue` — create an issue (title, body, optional labels).
+- `github-list_issues` — list issues, filterable by state, labels, and assignee.
+- `github-read_issue` — read one issue by number, including its full body.
+- `github-edit_issue` — update an existing issue's title and/or body.
 
-All are locked to repos owned by `MichaelHolley` (`agent/lib/get-owner.ts`); a bare repo name or a matching `owner/repo` slug is accepted. Requires `GITHUB_TOKEN` (PAT with `repo` scope).
+All are locked to repos owned by `MichaelHolley` (`agent/lib/github/owner.ts`); a bare repo name or a matching `owner/repo` slug is accepted. Requires `GITHUB_TOKEN` (PAT with `repo` scope).
 
-### Memory (`agent/tools/`)
+### Memory (`agent/tools/memory/`)
 
 Persistent notes stored across conversations, backed by [blob-bunny](https://github.com/MichaelHolley/blob-bunny):
 
-- `write_memory` — save/replace a memory by name, with a short description.
-- `read_memory` — read a memory's full content by name.
-- `list_memory` — list the memory map (name + description of each entry).
-- `delete_memory` — remove a memory by name.
+- `memory-write` — save/replace a memory by name, with a short description.
+- `memory-read` — read a memory's full content by name.
+- `memory-list` — list the memory map (name + description of each entry).
+- `memory-delete` — remove a memory by name.
 
 Memory names are slugs (letters, numbers, dashes, underscores, `/` to nest); the map itself is auto-maintained at the reserved `MEMORY` name. Requires `BLOB_BUNNY_URL` and `BLOB_BUNNY_TOKEN`.
 
@@ -44,9 +44,9 @@ Discord has no durable session per channel, so each `/mike` command would otherw
 
 - Written by `agent/hooks/chat-history.ts` on `message.received` (the user message) and on `message.completed` (the reply, skipping `tool-calls` turns so only what the user actually saw is stored). The Discord channel's auth attributes carry the invoking `username`, so entries name their speaker.
 - Replayed by `agent/instructions/chat-history.ts` on `turn.started`, as a system block marked untrusted data.
-- Cleared by the `clear_chat_history` tool. It takes no arguments — the channel is resolved from verified auth, so a prompt injection cannot wipe another channel. The confirmation reply is itself recorded, so a wipe leaves the channel holding that one agent entry.
+- Cleared by the `chat-clear_history` tool. It takes no arguments — the channel is resolved from verified auth, so a prompt injection cannot wipe another channel. The confirmation reply is itself recorded, so a wipe leaves the channel holding that one agent entry.
 
-All logic lives in `agent/lib/chat-history.ts`; the hook, instructions, and tool are thin adapters. Retention is set by exported constants there: newest **20** entries, each clamped to **2000** characters on write, and entries older than **7 days** dropped on read.
+All logic lives in `agent/lib/chat/history.ts`; the hook, instructions, and tool are thin adapters. Retention is set by exported constants there: newest **20** entries, each clamped to **2000** characters on write, and entries older than **7 days** dropped on read.
 
 Storage is one blob per channel at `history/discord/<channel_id>.json`, holding a JSON array of `{ role, author, text, at }`. Same backend as memory, so the same `BLOB_BUNNY_URL` and `BLOB_BUNNY_TOKEN`. Reads and writes are best-effort: a blob-bunny outage is logged to stderr and the bot answers without memory rather than failing the turn.
 

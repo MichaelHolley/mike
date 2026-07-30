@@ -1,4 +1,4 @@
-import { deleteBlob, getBlob, putBlob } from "./blob-bunny.js";
+import { deleteBlob, getBlob, putBlob } from "#lib/blob.js";
 
 const HISTORY_PREFIX = "history/";
 

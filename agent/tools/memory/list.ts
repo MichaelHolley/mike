@@ -1,12 +1,12 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
-import { getMemoryIndex } from "../lib/memory-index.js";
+import { getMemoryIndex } from "#lib/memory/index-map.js";
 
 export default defineTool({
   description:
     "List stored memories — persistent notes you have saved across " +
     "conversations. Returns the memory map: each entry's name and a short " +
-    "description. Call read_memory to get a specific memory's full content.",
+    "description. Call memory-read to get a specific memory's full content.",
   inputSchema: z.object({}),
   outputSchema: z.object({
     index: z.string().nullable(),
