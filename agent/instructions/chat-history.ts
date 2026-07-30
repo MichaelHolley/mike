@@ -1,5 +1,5 @@
 import { defineDynamic, defineInstructions } from "eve/instructions";
-import { historyChannelId, loadHistoryBlock } from "../lib/chat/history.js";
+import { historyChannelId, loadHistoryBlock } from "#lib/chat/history.js";
 
 export default defineDynamic({
   events: {

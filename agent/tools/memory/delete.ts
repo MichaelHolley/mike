@@ -1,8 +1,8 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
-import { deleteBlob } from "../../lib/blob.js";
-import { canonicalMemoryName, toMemoryPath } from "../../lib/memory/path.js";
-import { removeMemoryIndexEntry } from "../../lib/memory/index-map.js";
+import { deleteBlob } from "#lib/blob.js";
+import { canonicalMemoryName, toMemoryPath } from "#lib/memory/path.js";
+import { removeMemoryIndexEntry } from "#lib/memory/index-map.js";
 
 export default defineTool({
   description:

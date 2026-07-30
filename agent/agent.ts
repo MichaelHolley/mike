@@ -1,6 +1,6 @@
 import { defineAgent } from "eve";
 import { openrouter } from "@openrouter/ai-sdk-provider";
-import { getModel, getModelContextWindowTokens } from "./lib/model-config.js";
+import { getModel, getModelContextWindowTokens } from "#lib/model-config.js";
 
 export default defineAgent({
   model: openrouter(getModel()),

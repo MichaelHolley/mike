@@ -1,7 +1,7 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
-import { getBlob } from "../../lib/blob.js";
-import { canonicalMemoryName, toMemoryPath } from "../../lib/memory/path.js";
+import { getBlob } from "#lib/blob.js";
+import { canonicalMemoryName, toMemoryPath } from "#lib/memory/path.js";
 
 export default defineTool({
   description:

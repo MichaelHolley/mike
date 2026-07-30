@@ -1,6 +1,6 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
-import { clearHistory, historyChannelId } from "../../lib/chat/history.js";
+import { clearHistory, historyChannelId } from "#lib/chat/history.js";
 
 export default defineTool({
   description:
