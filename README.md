@@ -22,8 +22,9 @@ pnpm build && vercel deploy --prod
 
 - `create_github_issue` — create an issue (title, body, optional labels).
 - `list_github_issues` — list issues, filterable by state, labels, and assignee.
+- `read_github_issue` — read one issue by number, including its full body.
 
-Both are locked to repos owned by `MichaelHolley` (`agent/lib/get-owner.ts`); a bare repo name or a matching `owner/repo` slug is accepted. Requires `GITHUB_TOKEN` (PAT with `repo` scope).
+All are locked to repos owned by `MichaelHolley` (`agent/lib/get-owner.ts`); a bare repo name or a matching `owner/repo` slug is accepted. Requires `GITHUB_TOKEN` (PAT with `repo` scope).
 
 ### Memory (`agent/tools/`)
 
