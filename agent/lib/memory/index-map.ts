@@ -1,5 +1,5 @@
 import { getBlob, putBlob } from "#lib/blob.js";
-import { MEMORY_INDEX_NAME, MEMORY_PREFIX } from "./path.js";
+import { MEMORY_INDEX_NAME, MEMORY_PREFIX } from "#lib/memory/path.js";
 
 const INDEX_PATH = `${MEMORY_PREFIX}${MEMORY_INDEX_NAME}.md`;
 

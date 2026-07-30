@@ -4,7 +4,9 @@
   "type": "module",
   "packageManager": "pnpm@11.7.0",
   "imports": {
+    "#*.js": "./agent/*.ts",
     "#*": "./agent/*",
+    "#evals/*.js": "./evals/*.ts",
     "#evals/*": "./evals/*"
   },
   "scripts": {
