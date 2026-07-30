@@ -36,7 +36,8 @@ export default defineTool({
       .optional()
       .describe(
         "New Markdown body, replacing the current one in full. Omit to keep " +
-          "the current body. Structure: '## Summary' (one sentence: what + " +
+          "the current body; pass an empty string only to deliberately " +
+          "clear it. Structure: '## Summary' (one sentence: what + " +
           "impact), '## Details' (bug: steps, expected, actual; feature: " +
           "problem, proposed), optional '## Context' (logs/links). Omit any " +
           "section with no content — do not emit empty headings or " +
@@ -76,6 +77,7 @@ export default defineTool({
       throw new Error(
         `Cannot edit issue #${number} in "${owner}/${repoName}": the issue ` +
           `or the repository does not exist, or the token cannot access it.`,
+        { cause: error },
       );
     }
 

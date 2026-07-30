@@ -58,6 +58,7 @@ export default defineTool({
       throw new Error(
         `Cannot read issue #${number} in "${owner}/${repoName}": the issue ` +
           `or the repository does not exist, or the token cannot access it.`,
+        { cause: error },
       );
     }
 
