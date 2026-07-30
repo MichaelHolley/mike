@@ -64,9 +64,6 @@ export default defineTool({
     } catch (error) {
       if (!isNotFound(error)) throw error;
 
-      // GitHub answers 404 for a missing issue, a missing repo, and a repo
-      // the token cannot see, without distinguishing them. A probe of the
-      // repo cannot separate the last two either, so report the union.
       throw new Error(
         `Cannot read issue #${number} in "${owner}/${repoName}": the issue ` +
           `or the repository does not exist, or the token cannot access it.`,
