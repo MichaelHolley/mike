@@ -1,18 +1,9 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 import { getOwner } from "../lib/get-owner.js";
+import { isNotFound } from "../lib/github-errors.js";
 import { createOctokit } from "../lib/octokit.js";
 import { normalizeRepo } from "../lib/normalize-repo.js";
-
-/** Did this thrown value come back from GitHub as an HTTP 404? */
-function isNotFound(error: unknown) {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "status" in error &&
-    error.status === 404
-  );
-}
 
 export default defineTool({
   description:
@@ -67,6 +58,7 @@ export default defineTool({
       throw new Error(
         `Cannot read issue #${number} in "${owner}/${repoName}": the issue ` +
           `or the repository does not exist, or the token cannot access it.`,
+        { cause: error },
       );
     }
 
