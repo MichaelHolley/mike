@@ -85,13 +85,25 @@ export default defineTool({
       );
     }
 
-    const { data } = await octokit.rest.issues.update({
-      owner,
-      repo: repoName,
-      issue_number: number,
-      ...(title === undefined ? {} : { title }),
-      ...(body === undefined ? {} : { body }),
-    });
+    // The read above already proved the issue exists and is readable, so a
+    // failure here is a write-side problem (archived repo, locked issue,
+    // read-only token) — surface GitHub's own reason with the target named.
+    let data;
+    try {
+      ({ data } = await octokit.rest.issues.update({
+        owner,
+        repo: repoName,
+        issue_number: number,
+        ...(title === undefined ? {} : { title }),
+        ...(body === undefined ? {} : { body }),
+      }));
+    } catch (error) {
+      throw new Error(
+        `Cannot edit issue #${number} in "${owner}/${repoName}": ` +
+          `${error instanceof Error ? error.message : String(error)}`,
+        { cause: error },
+      );
+    }
 
     return {
       number: data.number,
