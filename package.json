@@ -18,14 +18,14 @@
   },
   "dependencies": {
     "@openrouter/ai-sdk-provider": "^3.0.0",
-    "@vercel/connect": "0.4.3",
-    "ai": "7.0.37",
-    "eve": "^0.27.7",
+    "@vercel/connect": "0.6.1",
+    "ai": "7.0.58",
+    "eve": "^0.31.3",
     "octokit": "^5.0.5",
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@types/node": "~26.1.2",
+    "@types/node": "~26.2.0",
     "@typescript/native-preview": "7.0.0-dev.20260707.2"
   },
   "overrides": {
