@@ -32,6 +32,8 @@ agent/
 
 Code shared by two domains goes at the `lib/` root, not inside one of them — burying it makes one domain depend on another.
 
+**Any tool that deletes something gets `approval: always()`** from `eve/tools/approval`, so a person confirms before the call runs. Name the affected item in the `inputSchema` field descriptions — that input is what the approval prompt shows.
+
 **Tool names come from the path.** eve discovers `agent/tools/` recursively and derives the model-facing slug as the path under `tools/` with `/` replaced by `-`, so `tools/github/read_issue.ts` is called `github-read_issue`. Renaming or moving a tool file renames the tool the model sees: update `instructions.md` and any cross-tool mentions inside other tools' `description` fields in the same change. Verify with `npx eve info` (expect 0 diagnostics) and check the slugs in `.eve/compile/compiled-agent-manifest.json`.
 
 ## Imports
