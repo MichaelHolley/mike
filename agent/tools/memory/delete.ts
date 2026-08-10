@@ -1,4 +1,5 @@
 import { defineTool } from "eve/tools";
+import { always } from "eve/tools/approval";
 import { z } from "zod";
 import { deleteBlob } from "#lib/blob.js";
 import { canonicalMemoryName, toMemoryPath } from "#lib/memory/path.js";
@@ -21,6 +22,7 @@ export default defineTool({
     name: z.string(),
     deleted: z.boolean(),
   }),
+  approval: always(),
   async execute({ name }) {
     const slug = canonicalMemoryName(name);
     // Prune the index unconditionally so a stale entry whose blob is already
