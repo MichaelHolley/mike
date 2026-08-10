@@ -9,4 +9,5 @@ export default defineAgent({
   // OPENROUTER_MODEL_CONTEXT_WINDOW_TOKENS if OPENROUTER_MODEL points at a
   // model with a different window than the default.
   modelContextWindowTokens: getModelContextWindowTokens(),
+  reasoning: "medium",
 });
