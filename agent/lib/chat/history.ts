@@ -137,14 +137,13 @@ export async function loadHistoryBlock(channelId: string): Promise<string | null
  * outage surfaces as a failed outcome rather than throwing into the turn.
  */
 export async function searchHistory(channelId: string, filter: string): Promise<JqOutcome> {
-  let entries: ChatHistoryEntry[];
   try {
-    entries = await readEntries(historyPath(channelId));
+    const entries = await readEntries(historyPath(channelId));
+    return await runJq(entries, filter);
   } catch (error) {
-    console.error("chat history search read failed", error);
-    return { ok: false, error: "Could not read stored history." };
+    console.error("chat history search failed", error);
+    return { ok: false, error: "Could not search stored history." };
   }
-  return runJq(entries, filter);
 }
 
 /** Throws, unlike the other two: a wipe that silently failed must reach the user. */

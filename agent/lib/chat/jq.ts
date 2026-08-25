@@ -13,7 +13,13 @@ export type JqOutcome =
  * content cannot alter the filter.
  */
 export async function runJq(input: JqInput, filter: string): Promise<JqOutcome> {
-  const jq = await (jqPromise ??= loadJq());
+  let jq: Jq;
+  try {
+    jq = await (jqPromise ??= loadJq());
+  } catch (error) {
+    jqPromise = undefined;
+    throw error;
+  }
   try {
     return { ok: true, results: jq.json(input, filter) };
   } catch (error) {
