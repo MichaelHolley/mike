@@ -14,8 +14,12 @@ const DISCORD_AUTHENTICATOR = "discord";
 
 export const MAX_ENTRIES = 500;
 
-/** Only the newest slice is replayed into the prompt each turn; deeper recall goes through the jq search tool. */
-export const RECENT_ENTRIES = 15;
+/**
+ * Only the newest slice is replayed into the prompt each turn; deeper recall goes
+ * through the jq search tool. Kept even so the window starts on a user message
+ * rather than orphaning an agent reply from its prompt.
+ */
+export const RECENT_ENTRIES = 16;
 
 /** Discord's message limit. eve splits longer replies rather than capping them, so an over-long reply is stored truncated. */
 export const MAX_ENTRY_CHARS = 2000;
