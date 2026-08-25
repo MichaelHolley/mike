@@ -20,6 +20,9 @@ importers:
       eve:
         specifier: ^0.31.3
         version: 0.31.3(ai@7.0.58(zod@4.4.3))
+      jq-wasm:
+        specifier: 3.0.0-jq-1.8.2
+        version: 3.0.0-jq-1.8.2
       octokit:
         specifier: ^5.0.5
         version: 5.0.5
@@ -508,6 +511,10 @@ packages:
 
   jose@5.10.0:
     resolution: {integrity: sha512-s+3Al/p9g32Iq+oqXxkW//7jk2Vig6FF1CFqzVXoTUXt2qz89YWbL+OwS17NFYEvxC35n0FKeGO2LGYSxeM2Gg==}
+
+  jq-wasm@3.0.0-jq-1.8.2:
+    resolution: {integrity: sha512-jgWSEBJSd0lYR4Q5Fw8333MxQS5jCRI+g9KwAGL7yK1spwzTJy8C5uOS08wbpKE0Gz8oQYLlRpNLE/W70Ksp2g==}
+    engines: {node: '>=20'}
 
   json-schema@0.4.0:
     resolution: {integrity: sha512-es94M3nTIfsEPisRafak+HDLfHXnKBhV3vU5eqPcS3flIWqcxJWgXHXiey3YrpaNsanY5ei1VoYEbOzijuq9BA==}
@@ -1145,6 +1152,8 @@ snapshots:
   isexe@2.0.0: {}
 
   jose@5.10.0: {}
+
+  jq-wasm@3.0.0-jq-1.8.2: {}
 
   json-schema@0.4.0: {}
 
