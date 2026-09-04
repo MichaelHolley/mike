@@ -40,13 +40,14 @@ Memory names are slugs (letters, numbers, dashes, underscores, `/` to nest); the
 
 ### Chat history (Discord only)
 
-Discord has no durable session per channel, so each `/mike` command would otherwise start blind. The runtime records both sides of every exchange and replays them on the next turn:
+Discord has no durable session per channel, so each `/mike` command would otherwise start blind. The runtime records both sides of every exchange, replays the most recent ones on the next turn, and lets the agent search older retained messages:
 
 - Written by `agent/hooks/chat-history.ts` on `message.received` (the user message) and on `message.completed` (the reply, skipping `tool-calls` turns so only what the user actually saw is stored). The Discord channel's auth attributes carry the invoking `username`, so entries name their speaker.
-- Replayed by `agent/instructions/chat-history.ts` on `turn.started`, as a system block marked untrusted data.
+- Replayed by `agent/instructions/chat-history.ts` on `turn.started`, as a system block marked untrusted data. Only the newest slice is replayed; the rest remains available for search.
+- Searched by the `chat-search_history` tool using a case-insensitive substring of message text or author name. It returns the newest matches in chronological order and searches only the current channel, resolved from verified auth. Search uses native TypeScript over the channel's bounded JSON blob and adds no dependency.
 - Cleared by the `chat-clear_history` tool. It takes no arguments — the channel is resolved from verified auth, so a prompt injection cannot wipe another channel. It requires human approval on every call. The confirmation reply is itself recorded, so a wipe leaves the channel holding that one agent entry.
 
-All logic lives in `agent/lib/chat/history.ts`; the hook, instructions, and tool are thin adapters. Retention is set by exported constants there: newest **20** entries, each clamped to **2000** characters on write, and entries older than **7 days** dropped on read.
+All logic lives in `agent/lib/chat/history.ts`; the hook, instructions, and tools are thin adapters. Retention is set by exported constants there: newest **500** entries, of which the newest **16** are replayed into the prompt, each clamped to **2000** characters on write. Entries older than **7 days** are omitted from automatic replay but remain searchable until displaced by the 500-entry cap.
 
 Storage is one blob per channel at `history/discord/<channel_id>.json`, holding a JSON array of `{ role, author, text, at }`. Same backend as memory, so the same `BLOB_BUNNY_URL` and `BLOB_BUNNY_TOKEN`. Reads and writes are best-effort: a blob-bunny outage is logged to stderr and the bot answers without memory rather than failing the turn.
 
