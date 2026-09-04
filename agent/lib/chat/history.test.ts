@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { findHistoryEntries, type ChatHistoryEntry } from "#lib/chat/history.js";
+import { findHistoryEntries, searchHistory, type ChatHistoryEntry } from "#lib/chat/history.js";
 
 const entries: ChatHistoryEntry[] = [
   { role: "user", author: "Alice", text: "Plan the deploy", at: "2026-01-01T00:00:00Z" },
@@ -18,4 +18,14 @@ test("findHistoryEntries searches case-insensitively and keeps the newest matche
     matches: [entries[0]],
   });
   assert.deepEqual(findHistoryEntries(entries, "  ", 10), { total: 0, matches: [] });
+});
+
+test("searchHistory degrades read errors to unavailable history", async () => {
+  const originalError = console.error;
+  console.error = () => {};
+  try {
+    assert.equal(await searchHistory("invalid/channel", "deploy", 10), null);
+  } finally {
+    console.error = originalError;
+  }
 });

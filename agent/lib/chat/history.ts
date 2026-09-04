@@ -153,8 +153,13 @@ export async function searchHistory(
   channelId: string,
   query: string,
   limit: number,
-): Promise<ChatHistorySearchResult> {
-  return findHistoryEntries(await readEntries(historyPath(channelId)), query, limit);
+): Promise<ChatHistorySearchResult | null> {
+  try {
+    return findHistoryEntries(await readEntries(historyPath(channelId)), query, limit);
+  } catch (error) {
+    console.error("chat history search failed", error);
+    return null;
+  }
 }
 
 /** Throws, unlike the other two: a wipe that silently failed must reach the user. */

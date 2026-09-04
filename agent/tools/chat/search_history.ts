@@ -12,6 +12,17 @@ const entrySchema = z.object({
   at: z.string(),
 });
 
+function renderResults(total: number, matches: readonly z.infer<typeof entrySchema>[]): string {
+  const newestMatches = [] as z.infer<typeof entrySchema>[];
+  for (let index = matches.length - 1; index >= 0; index -= 1) {
+    const entry = matches[index];
+    const candidate = [entry, ...newestMatches];
+    if (JSON.stringify({ total, matches: candidate }).length > MAX_OUTPUT_CHARS) break;
+    newestMatches.unshift(entry);
+  }
+  return JSON.stringify({ total, matches: newestMatches });
+}
+
 export default defineTool({
   description:
     "Search older messages stored for this Discord channel by case-insensitive text or author " +
@@ -23,25 +34,25 @@ export default defineTool({
   }),
   outputSchema: z.object({
     supported: z.boolean(),
+    available: z.boolean(),
     total: z.number().int().optional(),
     matches: z.array(entrySchema).optional(),
   }),
   async execute({ query, limit }, ctx) {
     const channelId = historyChannelId(ctx.session.auth.current);
-    if (!channelId) return { supported: false };
-    return { supported: true, ...(await searchHistory(channelId, query, limit)) };
+    if (!channelId) return { supported: false, available: false };
+    const result = await searchHistory(channelId, query, limit);
+    return result
+      ? { supported: true, available: true, ...result }
+      : { supported: true, available: false };
   },
   toModelOutput(output) {
     if (!output.supported) {
       return { type: "text", value: "Conversation history is only recorded on Discord." };
     }
-    const json = JSON.stringify({ total: output.total, matches: output.matches });
-    return {
-      type: "text",
-      value:
-        json.length > MAX_OUTPUT_CHARS
-          ? `${json.slice(0, MAX_OUTPUT_CHARS)}\n…(truncated)`
-          : json,
-    };
+    if (!output.available) {
+      return { type: "text", value: "Conversation history is temporarily unavailable." };
+    }
+    return { type: "text", value: renderResults(output.total ?? 0, output.matches ?? []) };
   },
 });
