@@ -1,6 +1,6 @@
 # mike
 
-An [eve](https://eve.dev) agent app (model via OpenRouter), deployed on Vercel.
+An [eve](https://eve.dev) agent app (model via OpenRouter), self-hosted as a Docker image.
 
 ## Develop & deploy
 
@@ -8,12 +8,13 @@ An [eve](https://eve.dev) agent app (model via OpenRouter), deployed on Vercel.
 pnpm install
 pnpm dev          # local dev (loopback-only auth)
 pnpm typecheck
-pnpm build && vercel deploy --prod
 ```
+
+Pushes to `main` publish the Docker image to Docker Hub. See [docs/deployment.md](docs/deployment.md) for the image, the Docker Compose setup and the reverse proxy requirements.
 
 ## Channels
 
-- **eve** (`agent/channels/eve.ts`) — default HTTP session API.
+- **eve** (`agent/channels/eve.ts`) — HTTP session API, open only under `pnpm dev` and closed in production; its public health route stays up.
 - **discord** (`agent/channels/discord.ts`) — slash commands at `POST /eve/v1/discord`. Set `DISCORD_PUBLIC_KEY`, `DISCORD_APPLICATION_ID`, `DISCORD_BOT_TOKEN` (see `.env.example`); point the app's Interactions Endpoint URL at that route.
 
 ## Tools

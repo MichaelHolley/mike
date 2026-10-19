@@ -6,7 +6,7 @@ This project uses the eve framework. Before writing code, always read the releva
 
 ### eve
 
-The agent framework the app is built on. It owns the runtime: channels (HTTP session API, Discord), tool registration, and deployment to Vercel. The model is served via OpenRouter. Source lives under `agent/`; Guides are in `node_modules/eve/docs/`.
+The agent framework the app is built on. It owns the runtime: channels (HTTP session API, Discord), tool registration, and the Node server build shipped as a Docker image (`Dockerfile`). The model is served via OpenRouter. Source lives under `agent/`; Guides are in `node_modules/eve/docs/`.
 
 ### blob-bunny
 
@@ -14,7 +14,7 @@ The agent framework the app is built on. It owns the runtime: channels (HTTP ses
 
 ## Workspace structure
 
-`agent/tools/` and `agent/lib/` are grouped by domain — `github/`, `memory/`, `chat/`. Add a new tool to the folder for its domain; add a new domain as a new folder in both places.
+`agent/tools/` and `agent/lib/` are grouped by domain — `github/`, `memory/`, `chat/`. Add a new tool to the folder for its domain; add a new domain as a new folder in both places. The only files at the `agent/tools/` root are `disableTool()` stubs for eve's sandbox built-ins (`bash`, `read_file`, `write_file`); they must keep the built-in's name to override it, and keeping them lets the Docker image skip the sandbox.
 
 ```
 agent/
