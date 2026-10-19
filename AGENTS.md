@@ -8,9 +8,9 @@ This project uses the eve framework. Before writing code, always read the releva
 
 The agent framework the app is built on. It owns the runtime: channels (HTTP session API, Discord), tool registration, and the Node server build shipped as a Docker image (`Dockerfile`). The model is served via OpenRouter. Source lives under `agent/`; Guides are in `node_modules/eve/docs/`.
 
-### blob-bunny
+### SQLite
 
-<https://github.com/MichaelHolley/blob-bunny> — a minimal HTTP blob store (Bun, self-hosted via Docker) used as the backend for the agent's persistent memory tools. Blobs are keyed by request pathname; all requests need `Authorization: Bearer <token>`. The client is `agent/lib/blob.ts`, shared by both the memory tools and the chat-history hook.
+Memory and Discord chat history live in one SQLite file (`DATABASE_PATH`, default `./data/mike.db`) via Node's built-in `node:sqlite` — no native dependency, no extra service. `agent/lib/db.ts` owns the connection (lazy singleton, WAL), the schema and the shared search helpers. Schema changes go in as a new entry appended to its `MIGRATIONS` array; never edit an entry that has shipped, since `PRAGMA user_version` records which ones already ran.
 
 ## Workspace structure
 
@@ -26,7 +26,7 @@ agent/
 ├── tools/{github,memory,chat}/
 └── lib/
     ├── {github,memory,chat}/   # domain helpers
-    ├── blob.ts                 # shared: memory + chat both use it
+    ├── db.ts                   # shared: memory + chat both use it
     └── model-config.ts         # shared
 ```
 

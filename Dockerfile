@@ -14,12 +14,13 @@ WORKDIR /app
 
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
-    PORT=3000
+    PORT=3000 \
+    DATABASE_PATH=/app/data/mike.db
 
 COPY --from=build /app/.output ./.output
 
-RUN mkdir -p .eve/.workflow-data && chown -R node:node .eve
-VOLUME ["/app/.eve/.workflow-data"]
+RUN mkdir -p .eve/.workflow-data data && chown -R node:node .eve data
+VOLUME ["/app/.eve/.workflow-data", "/app/data"]
 
 USER node
 EXPOSE 3000

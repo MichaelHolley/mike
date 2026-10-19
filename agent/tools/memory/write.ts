@@ -1,49 +1,67 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
-import { putBlob } from "#lib/blob.js";
-import { canonicalMemoryName, toMemoryPath } from "#lib/memory/path.js";
-import { upsertMemoryIndexEntry } from "#lib/memory/index-map.js";
+import { createMemory, updateMemory } from "#lib/memory/store.js";
 
 export default defineTool({
   description:
-    "Save a memory so it persists across conversations. Writing a name that " +
-    "already exists REPLACES it — to add to an existing memory, memory-read " +
-    "first and write back the full combined content. The memory map is " +
-    "updated automatically.",
+    "Save a memory so it persists across conversations. Without an id it " +
+    "creates a new memory and needs title, description and content. With an " +
+    "id it updates that memory: only the fields you pass change, but content " +
+    "is replaced as a whole — to add to it, memory-read first and pass the " +
+    "full combined content.",
   inputSchema: z.object({
-    name: z
+    id: z
+      .number()
+      .int()
+      .optional()
+      .describe("Id of the memory to update. Omit to create a new memory."),
+    title: z
       .string()
+      .trim()
       .min(1)
-      .describe(
-        "Short, stable, descriptive slug identifying the memory, e.g. " +
-          "'user-preferences'. Letters, numbers, dashes, underscores, and " +
-          "'/' to nest. No 'memory/' prefix or '.md' extension.",
-      ),
+      .optional()
+      .describe("Short descriptive title, e.g. 'User preferences'."),
     description: z
       .string()
+      .trim()
       .min(1)
+      .optional()
       .describe(
-        "One short line summarizing this memory, shown in the memory map " +
-          "listing so you can decide whether to read the full content later.",
+        "One short line summarizing this memory, shown in the memory map so " +
+          "you can decide whether to read the full content later.",
       ),
     content: z
       .string()
       .min(1)
+      .optional()
       .describe(
-        "Full Markdown content of the memory. This replaces any prior " +
-          "content under the same name, so include everything worth keeping.",
+        "Full Markdown content of the memory. Replaces any prior content, so " +
+          "include everything worth keeping.",
       ),
   }),
   outputSchema: z.object({
-    name: z.string(),
+    id: z.number().int(),
+    created: z.boolean(),
   }),
-  async execute({ name, description, content }) {
-    const slug = canonicalMemoryName(name);
-    await putBlob(toMemoryPath(slug), content);
-    await upsertMemoryIndexEntry(slug, description);
-    return { name: slug };
+  execute({ id, title, description, content }) {
+    if (id === undefined) {
+      if (!title || !description || !content) {
+        throw new Error("Creating a memory needs title, description and content.");
+      }
+      return { id: createMemory({ title, description, content }), created: true };
+    }
+    if (title === undefined && description === undefined && content === undefined) {
+      throw new Error("Pass at least one of title, description or content to update.");
+    }
+    if (!updateMemory(id, { title, description, content })) {
+      throw new Error(`No memory with id ${id}.`);
+    }
+    return { id, created: false };
   },
   toModelOutput(output) {
-    return { type: "text", value: `Saved memory "${output.name}".` };
+    return {
+      type: "text",
+      value: `${output.created ? "Created" : "Updated"} memory ${output.id}.`,
+    };
   },
 });

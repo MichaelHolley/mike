@@ -1,34 +1,36 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
-import { getBlob } from "#lib/blob.js";
-import { canonicalMemoryName, toMemoryPath } from "#lib/memory/path.js";
+import { readMemory } from "#lib/memory/store.js";
 
 export default defineTool({
   description:
-    "Read the full content of a stored memory by name. Use the names returned " +
-    "by memory-list.",
+    "Read the full content of a stored memory by id. Use the ids returned by " +
+    "memory-list or memory-search.",
   inputSchema: z.object({
-    name: z
-      .string()
-      .min(1)
-      .describe(
-        "Memory name as shown by memory-list, e.g. 'user-preferences'. Do " +
-          "not include the 'memory/' prefix or the '.md' extension.",
-      ),
+    id: z.number().int().describe("Memory id as shown by memory-list or memory-search."),
   }),
   outputSchema: z.object({
-    name: z.string(),
-    content: z.string().nullable(),
+    id: z.number().int(),
+    memory: z
+      .object({
+        title: z.string(),
+        description: z.string(),
+        content: z.string(),
+        updatedAt: z.string(),
+      })
+      .nullable(),
   }),
-  async execute({ name }) {
-    const slug = canonicalMemoryName(name);
-    const content = await getBlob(toMemoryPath(slug));
-    return { name: slug, content };
+  execute({ id }) {
+    return { id, memory: readMemory(id) };
   },
   toModelOutput(output) {
-    if (output.content === null) {
-      return { type: "text", value: `No memory named "${output.name}".` };
+    if (!output.memory) {
+      return { type: "text", value: `No memory with id ${output.id}.` };
     }
-    return { type: "text", value: output.content };
+    const { title, description, content, updatedAt } = output.memory;
+    return {
+      type: "text",
+      value: `# ${title}\n\n_${description}_ (id ${output.id}, updated ${updatedAt})\n\n${content}`,
+    };
   },
 });

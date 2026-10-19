@@ -4,6 +4,7 @@ node_modules
 .vercel
 .nitro
 .workflow-data
+data
 .env
 .env.*
 !.env.example
