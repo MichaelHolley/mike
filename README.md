@@ -1,6 +1,6 @@
 # mike
 
-An [eve](https://eve.dev) agent app (model via OpenRouter), deployed on Vercel.
+An [eve](https://eve.dev) agent app (model via OpenRouter), self-hosted as a Docker image.
 
 ## Develop & deploy
 
@@ -8,12 +8,35 @@ An [eve](https://eve.dev) agent app (model via OpenRouter), deployed on Vercel.
 pnpm install
 pnpm dev          # local dev (loopback-only auth)
 pnpm typecheck
-pnpm build && vercel deploy --prod
 ```
+
+Pushes to `main` publish the image to Docker Hub as `<DOCKERHUB_USERNAME>/mike` (`.github/workflows/publish.yml`; needs the `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repo secrets). Build it locally with `docker build -t mike .`.
+
+### Docker
+
+```yaml
+services:
+  mike:
+    image: <DOCKERHUB_USERNAME>/mike:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file: stack.env # Portainer writes stack env vars here; see .env.example
+    volumes:
+      - workflow-data:/app/.eve/.workflow-data
+
+volumes:
+  workflow-data:
+```
+
+- `/app/.eve/.workflow-data` holds durable run state; keep it on a volume so in-flight runs survive container replacement.
+- Put it behind an HTTPS reverse proxy (Discord requires HTTPS) that forwards both `/eve/` and `/.well-known/workflow/` unchanged — runs stall if workflow callbacks can't reach the server.
+- The container healthcheck probes the public `GET /eve/v1/health`.
+- The built-in `bash`, `read_file` and `write_file` tools are disabled (`agent/tools/{bash,read_file,write_file}.ts`), so the agent needs no sandbox and the image builds with `--skip-sandbox-prewarm`.
 
 ## Channels
 
-- **eve** (`agent/channels/eve.ts`) — default HTTP session API.
+- **eve** (`agent/channels/eve.ts`) — HTTP session API, open only under `pnpm dev` and closed in production; its public health route stays up.
 - **discord** (`agent/channels/discord.ts`) — slash commands at `POST /eve/v1/discord`. Set `DISCORD_PUBLIC_KEY`, `DISCORD_APPLICATION_ID`, `DISCORD_BOT_TOKEN` (see `.env.example`); point the app's Interactions Endpoint URL at that route.
 
 ## Tools
