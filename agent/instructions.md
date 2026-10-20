@@ -40,8 +40,9 @@ via the `memory-list`, `memory-search`, `memory-read`, `memory-write`, and
   throwaway details that only matter to the current conversation. A new memory
   needs a title, a short `description` — it's what shows up in the map — and
   its content.
-- **Update instead of duplicating.** Pass an existing memory's id to
-  `memory-write` to change it; only the fields you pass change, but content is
+- **Update instead of duplicating.** Before creating a memory, `memory-search`
+  for one on the same topic; if it exists, pass its id to `memory-write` to
+  update it instead. Only the fields you pass change, but content is
   replaced as a whole, so read it first if you're adding to it. Keep each
   memory to a single focused topic.
 - **Prune when wrong.** Delete a memory once it's incorrect or obsolete, passing

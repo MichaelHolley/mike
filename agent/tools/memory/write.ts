@@ -5,7 +5,9 @@ import { createMemory, updateMemory } from "#lib/memory/store.js";
 export default defineTool({
   description:
     "Save a memory so it persists across conversations. Without an id it " +
-    "creates a new memory and needs title, description and content. With an " +
+    "creates a new memory and needs title, description and content — " +
+    "memory-search first and update an existing memory on the same topic " +
+    "instead of creating a duplicate. With an " +
     "id it updates that memory: only the fields you pass change, but content " +
     "is replaced as a whole — to add to it, memory-read first and pass the " +
     "full combined content.",
