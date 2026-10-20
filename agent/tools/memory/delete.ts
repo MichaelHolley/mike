@@ -1,42 +1,43 @@
 import { defineTool } from "eve/tools";
 import { always } from "eve/tools/approval";
 import { z } from "zod";
-import { deleteBlob } from "#lib/blob.js";
-import { canonicalMemoryName, toMemoryPath } from "#lib/memory/path.js";
-import { removeMemoryIndexEntry } from "#lib/memory/index-map.js";
+import { deleteMemory, readMemory } from "#lib/memory/store.js";
 
 export default defineTool({
   description:
-    "Permanently delete a stored memory by name. Use when a memory is wrong " +
-    "or no longer relevant.",
+    "Permanently delete a stored memory. Use when a memory is wrong or no " +
+    "longer relevant. Pass both its id and its current title.",
   inputSchema: z.object({
-    name: z
+    id: z.number().int().describe("Id of the memory to delete."),
+    title: z
       .string()
+      .trim()
       .min(1)
-      .describe(
-        "Memory name as shown by memory-list, e.g. 'user-preferences'. Do " +
-          "not include the 'memory/' prefix or the '.md' extension.",
-      ),
+      .describe("Exact current title of the memory to delete, as shown by memory-list."),
   }),
   outputSchema: z.object({
-    name: z.string(),
+    id: z.number().int(),
+    title: z.string(),
     deleted: z.boolean(),
   }),
   approval: always(),
-  async execute({ name }) {
-    const slug = canonicalMemoryName(name);
-    // Prune the index unconditionally so a stale entry whose blob is already
-    // gone (404) still gets reconciled out of the map.
-    const deleted = await deleteBlob(toMemoryPath(slug));
-    await removeMemoryIndexEntry(slug);
-    return { name: slug, deleted };
+  execute({ id, title }) {
+    const memory = readMemory(id);
+    if (!memory) return { id, title, deleted: false };
+    // The person approved the title they were shown, so never delete a different memory.
+    if (memory.title !== title) {
+      throw new Error(
+        `Memory ${id} is titled "${memory.title}", not "${title}". Nothing was deleted.`,
+      );
+    }
+    return { id, title, deleted: deleteMemory(id) };
   },
   toModelOutput(output) {
     return {
       type: "text",
       value: output.deleted
-        ? `Deleted memory "${output.name}".`
-        : `No memory named "${output.name}" to delete.`,
+        ? `Deleted memory ${output.id} "${output.title}".`
+        : `No memory with id ${output.id} to delete.`,
     };
   },
 });

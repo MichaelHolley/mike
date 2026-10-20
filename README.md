@@ -30,14 +30,15 @@ All are locked to repos owned by `MichaelHolley` (`agent/lib/github/owner.ts`); 
 
 ### Memory (`agent/tools/memory/`)
 
-Persistent notes stored across conversations, backed by [blob-bunny](https://github.com/MichaelHolley/blob-bunny):
+Persistent notes stored across conversations, one row per memory in the SQLite database (see [Storage](#storage)):
 
-- `memory-write` — save/replace a memory by name, with a short description.
-- `memory-read` — read a memory's full content by name.
-- `memory-list` — list the memory map (name + description of each entry).
-- `memory-delete` — remove a memory by name. Requires human approval on every call.
+- `memory-list` — list the memory map (id, title and description of each memory).
+- `memory-search` — case-insensitive substring search over title, description and content, ranked by relevance; returns each match's id, title, description and a snippet.
+- `memory-read` — read a memory's full content by id.
+- `memory-write` — without an id, create a memory (title, description, content); with an id, update only the passed fields, replacing content as a whole.
+- `memory-delete` — remove a memory by id and title. Requires human approval on every call; refuses if the title doesn't match the stored one, so the approval prompt always names what gets deleted.
 
-Memory names are slugs (letters, numbers, dashes, underscores, `/` to nest); the map itself is auto-maintained at the reserved `MEMORY` name. Requires `BLOB_BUNNY_URL` and `BLOB_BUNNY_TOKEN`.
+Memory is global — shared across every channel and user.
 
 ### Chat history (Discord only)
 
@@ -45,14 +46,16 @@ Discord has no durable session per channel, so each `/mike` command would otherw
 
 - Written by `agent/hooks/chat-history.ts` on `message.received` (the user message) and on `message.completed` (the reply, skipping `tool-calls` turns so only what the user actually saw is stored). The Discord channel's auth attributes carry the invoking `username`, so entries name their speaker.
 - Replayed by `agent/instructions/chat-history.ts` on `turn.started`, as a system block marked untrusted data. Only the newest slice is replayed; the rest remains available for search.
-- Searched by the `chat-search_history` tool using a case-insensitive substring of message text or author name. It returns the newest matches in chronological order and searches only the current channel, resolved from verified auth. Search uses native TypeScript over the channel's bounded JSON blob and adds no dependency.
+- Searched by the `chat-search_history` tool using a case-insensitive substring of message text or author name. It returns the newest matches in chronological order, each as a snippet with author and timestamp, and searches only the current channel, resolved from verified auth. Total output is capped at 8000 characters.
 - Cleared by the `chat-clear_history` tool. It takes no arguments — the channel is resolved from verified auth, so a prompt injection cannot wipe another channel. It requires human approval on every call. The confirmation reply is itself recorded, so a wipe leaves the channel holding that one agent entry.
 
-All logic lives in `agent/lib/chat/history.ts`; the hook, instructions, and tools are thin adapters. Retention is set by exported constants there: newest **500** entries, of which the newest **16** are replayed into the prompt, each clamped to **2000** characters on write. Entries older than **7 days** are omitted from automatic replay but remain searchable until displaced by the 500-entry cap.
+All logic lives in `agent/lib/chat/history.ts`; the hook, instructions, and tools are thin adapters. Retention is set by exported constants there: messages are kept for **90 days** (pruned on each insert); the newest **16** from the last **7 days** are replayed into the prompt, each clamped to **2000** characters when replayed. Full text is stored and searchable.
 
-Storage is one blob per channel at `history/discord/<channel_id>.json`, holding a JSON array of `{ role, author, text, at }`. Same backend as memory, so the same `BLOB_BUNNY_URL` and `BLOB_BUNNY_TOKEN`. Reads and writes are best-effort: a blob-bunny outage is logged to stderr and the bot answers without memory rather than failing the turn.
+Storage is one row per message in the `chat_messages` table, keyed by channel id. Inserts are atomic, so concurrent turns in the same channel never lose entries. Reads and writes are best-effort: a database error is logged to stderr and the bot answers without history rather than failing the turn.
 
-**Known limitation:** each turn does read-modify-write, and blob-bunny has no conditional writes. Two genuinely concurrent turns in the same channel will lose one turn's entries. Accepted — fixing it needs conditional writes upstream in blob-bunny.
+## Storage
+
+Memory and chat history share one SQLite file at `DATABASE_PATH` (default `./data/mike.db`, gitignored; `/app/data/mike.db` in the Docker image, on the volume described in [docs/deployment.md](docs/deployment.md)), using Node's built-in `node:sqlite` — no native dependency and no separate service. `agent/lib/db.ts` opens it lazily in WAL mode and applies ordered migrations tracked via `PRAGMA user_version`. Search uses FTS5 with the `trigram` tokenizer (case-insensitive substring matching); queries shorter than 3 characters fall back to `LIKE`.
 
 ## Register slash commands
 

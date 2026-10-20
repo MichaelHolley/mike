@@ -5,20 +5,20 @@ import { historyChannelId, searchHistory } from "#lib/chat/history.js";
 const MAX_RESULTS = 10;
 const MAX_OUTPUT_CHARS = 8000;
 
-const entrySchema = z.object({
+const matchSchema = z.object({
   role: z.enum(["user", "agent"]),
   author: z.string(),
-  text: z.string(),
+  snippet: z.string(),
   at: z.string(),
 });
 
-function renderResults(total: number, matches: readonly z.infer<typeof entrySchema>[]): string {
-  const newestMatches = [] as z.infer<typeof entrySchema>[];
+function renderResults(total: number, matches: readonly z.infer<typeof matchSchema>[]): string {
+  const newestMatches = [] as z.infer<typeof matchSchema>[];
   for (let index = matches.length - 1; index >= 0; index -= 1) {
-    const entry = matches[index];
-    const candidate = [entry, ...newestMatches];
+    const match = matches[index];
+    const candidate = [match, ...newestMatches];
     if (JSON.stringify({ total, matches: candidate }).length > MAX_OUTPUT_CHARS) break;
-    newestMatches.unshift(entry);
+    newestMatches.unshift(match);
   }
   return JSON.stringify({ total, matches: newestMatches });
 }
@@ -26,8 +26,9 @@ function renderResults(total: number, matches: readonly z.infer<typeof entrySche
 export default defineTool({
   description:
     "Search older messages stored for this Discord channel by case-insensitive text or author " +
-    "substring. Results are the newest matches in chronological order. Use this when the recent " +
-    "conversation does not contain context needed to answer the user. Only searches the current channel.",
+    "substring. Results are the newest matches in chronological order, each a snippet around the " +
+    "match with its author and timestamp. Use this when the recent conversation does not contain " +
+    "context needed to answer the user. Only searches the current channel.",
   inputSchema: z.object({
     query: z.string().trim().min(1).describe("Words or phrase to find in message text or author names."),
     limit: z.number().int().min(1).max(MAX_RESULTS).default(MAX_RESULTS),
@@ -36,12 +37,12 @@ export default defineTool({
     supported: z.boolean(),
     available: z.boolean(),
     total: z.number().int().optional(),
-    matches: z.array(entrySchema).optional(),
+    matches: z.array(matchSchema).optional(),
   }),
-  async execute({ query, limit }, ctx) {
+  execute({ query, limit }, ctx) {
     const channelId = historyChannelId(ctx.session.auth.current);
     if (!channelId) return { supported: false, available: false };
-    const result = await searchHistory(channelId, query, limit);
+    const result = searchHistory(channelId, query, limit);
     return result
       ? { supported: true, available: true, ...result }
       : { supported: true, available: false };

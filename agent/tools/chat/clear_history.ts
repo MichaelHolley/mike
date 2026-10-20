@@ -14,10 +14,10 @@ export default defineTool({
     cleared: z.boolean(),
   }),
   approval: always(),
-  async execute(_input, ctx) {
+  execute(_input, ctx) {
     const channelId = historyChannelId(ctx.session.auth.current);
     if (!channelId) return { supported: false, cleared: false };
-    return { supported: true, cleared: await clearHistory(channelId) };
+    return { supported: true, cleared: clearHistory(channelId) };
   },
   toModelOutput(output) {
     if (!output.supported) {
