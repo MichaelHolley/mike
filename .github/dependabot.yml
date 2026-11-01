@@ -4,3 +4,10 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+    labels:
+      - "dependencies"
+    groups:
+      all-dependencies:
+        applies-to: version-updates
+        patterns:
+          - "*"

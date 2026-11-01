@@ -48,6 +48,15 @@ import { getOwner } from "./owner.js";                 // no, even for a sibling
 
 `#*` maps to `agent/*` via `package.json#imports`. Keep the `.js` extension: the `#*.js` → `./agent/*.ts` entry is what lets a `.js` specifier resolve to the real `.ts` file, under both eve's bundler and bare `node` (which strips types natively but never rewrites `.js` to `.ts` for relative specifiers — hence no relative imports, siblings included).
 
+## Testing
+
+This project has no automated tests and none are expected. Don't add a test
+runner, test files or evals, and don't propose them in plans or follow-ups.
+
+Verify a change with `pnpm typecheck` and `npx eve info` (expect 0
+diagnostics). Anything touching a channel, tool or prompt gets exercised in
+Discord by hand.
+
 ## Documentation
 
 When a feature is added, removed or changed, update `README.md` (and any affected docs) in the same change.
