@@ -10,24 +10,22 @@ The agent framework the app is built on. It owns the runtime: channels (HTTP ses
 
 ### SQLite
 
-Memory and Discord chat history live in one SQLite file (`DATABASE_PATH`, default `./data/mike.db`) via Node's built-in `node:sqlite` — no native dependency, no extra service. `agent/lib/db.ts` owns the connection (lazy singleton, WAL), the schema and the shared search helpers. Schema changes go in as a new entry appended to its `MIGRATIONS` array; never edit an entry that has shipped, since `PRAGMA user_version` records which ones already ran.
+Memory lives in one SQLite file (`DATABASE_PATH`, default `./data/mike.db`) via Node's built-in `node:sqlite` — no native dependency, no extra service. `agent/lib/db.ts` owns the connection (lazy singleton, WAL), the schema and the shared search helpers. Schema changes go in as a new entry appended to its `MIGRATIONS` array; never edit an entry that has shipped, since `PRAGMA user_version` records which ones already ran.
 
 ## Workspace structure
 
-`agent/tools/` and `agent/lib/` are grouped by domain — `github/`, `memory/`, `chat/`. Add a new tool to the folder for its domain; add a new domain as a new folder in both places. The only files at the `agent/tools/` root are `disableTool()` stubs for eve's sandbox built-ins (`bash`, `read_file`, `write_file`); they must keep the built-in's name to override it, and keeping them lets the Docker image skip the sandbox.
+`agent/tools/` and `agent/lib/` are grouped by domain — `github/`, `memory/`. Add a new tool to the folder for its domain; add a new domain as a new folder in both places. The only files at the `agent/tools/` root are `disableTool()` stubs for eve's sandbox built-ins (`bash`, `read_file`, `write_file`); they must keep the built-in's name to override it, and keeping them lets the Docker image skip the sandbox.
 
 ```
 agent/
 ├── agent.ts                 # model + context window
 ├── instructions.md          # static prompt
-├── instructions/            # dynamic prompt fragments
-├── hooks/                   # event handlers
 ├── channels/                # discord, eve HTTP
-├── tools/{github,memory,chat}/
+├── tools/{github,memory}/
 └── lib/
-    ├── {github,memory,chat}/   # domain helpers
-    ├── db.ts                   # shared: memory + chat both use it
-    └── model-config.ts         # shared
+    ├── {github,memory}/   # domain helpers
+    ├── db.ts              # shared: connection, migrations, search helpers
+    └── model-config.ts    # shared
 ```
 
 Code shared by two domains goes at the `lib/` root, not inside one of them — burying it makes one domain depend on another.

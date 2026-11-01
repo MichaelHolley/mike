@@ -55,6 +55,12 @@ const MIGRATIONS = [
     VALUES ('delete', old.id, old.author, old.text);
   END;
   `,
+  `
+  DROP TRIGGER chat_messages_ai;
+  DROP TRIGGER chat_messages_ad;
+  DROP TABLE chat_messages_fts;
+  DROP TABLE chat_messages;
+  `,
 ];
 
 let db: DatabaseSync | undefined;

@@ -40,22 +40,9 @@ Persistent notes stored across conversations, one row per memory in the SQLite d
 
 Memory is global — shared across every channel and user.
 
-### Chat history (Discord only)
-
-Discord has no durable session per channel, so each `/mike` command would otherwise start blind. The runtime records both sides of every exchange, replays the most recent ones on the next turn, and lets the agent search older retained messages:
-
-- Written by `agent/hooks/chat-history.ts` on `turn.settled`: the user message, then the final reply when the turn completed (narration before tool calls is skipped, so only what the user actually saw is stored). Recording at settle keeps a turn's own message out of the history it replays. The Discord channel's auth attributes carry the invoking `username`, so entries name their speaker.
-- Replayed by `agent/instructions/chat-history.ts`, loaded once per turn, as a system block marked untrusted data. Only the newest slice is replayed; the rest remains available for search.
-- Searched by the `chat-search_history` tool using a case-insensitive substring of message text or author name. It returns the newest matches in chronological order, each as a snippet with author and timestamp, and searches only the current channel, resolved from verified auth. Total output is capped at 8000 characters.
-- Cleared by the `chat-clear_history` tool. It takes no arguments — the channel is resolved from verified auth, so a prompt injection cannot wipe another channel. It requires human approval on every call. The exchange that asked for the wipe is recorded after it, so a wipe leaves the channel holding that request and its confirmation.
-
-All logic lives in `agent/lib/chat/history.ts`; the hook, instructions, and tools are thin adapters. Retention is set by exported constants there: messages are kept for **90 days** (pruned on each insert); the newest **16** from the last **7 days** are replayed into the prompt, each clamped to **2000** characters when replayed. Full text is stored and searchable.
-
-Storage is one row per message in the `chat_messages` table, keyed by channel id. Inserts are atomic, so concurrent turns in the same channel never lose entries. Reads and writes are best-effort: a database error is logged to stderr and the bot answers without history rather than failing the turn.
-
 ## Storage
 
-Memory and chat history share one SQLite file at `DATABASE_PATH` (default `./data/mike.db`, gitignored; `/app/data/mike.db` in the Docker image, on the volume described in [docs/deployment.md](docs/deployment.md)), using Node's built-in `node:sqlite` — no native dependency and no separate service. `agent/lib/db.ts` opens it lazily in WAL mode and applies ordered migrations tracked via `PRAGMA user_version`. Search uses FTS5 with the `trigram` tokenizer (case-insensitive substring matching); queries shorter than 3 characters fall back to `LIKE`.
+Memory lives in one SQLite file at `DATABASE_PATH` (default `./data/mike.db`, gitignored; `/app/data/mike.db` in the Docker image, on the volume described in [docs/deployment.md](docs/deployment.md)), using Node's built-in `node:sqlite` — no native dependency and no separate service. `agent/lib/db.ts` opens it lazily in WAL mode and applies ordered migrations tracked via `PRAGMA user_version`. Search uses FTS5 with the `trigram` tokenizer (case-insensitive substring matching); queries shorter than 3 characters fall back to `LIKE`.
 
 ## Register slash commands
 

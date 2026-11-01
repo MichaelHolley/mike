@@ -13,9 +13,6 @@ const auth = (interaction: {
     attributes: {
       channel_id: interaction.channelId,
       guild_id: interaction.guildId ?? "",
-      // Names the speaker in replayed chat history; a snowflake id is
-      // useless to the model in a multi-speaker channel.
-      username: interaction.user.username,
     },
   },
 });
