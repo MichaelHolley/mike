@@ -10,19 +10,19 @@ importers:
     dependencies:
       '@openrouter/ai-sdk-provider':
         specifier: ^3.1.0
-        version: 3.1.0(ai@7.0.126(zod@4.6.5))(zod@4.6.5)
+        version: 3.1.0(ai@7.0.126(zod@4.6.7))(zod@4.6.7)
       ai:
         specifier: 7.0.126
-        version: 7.0.126(zod@4.6.5)
+        version: 7.0.126(zod@4.6.7)
       eve:
         specifier: ^0.69.0
-        version: 0.69.0(ai@7.0.126(zod@4.6.5))
+        version: 0.69.0(ai@7.0.126(zod@4.6.7))
       octokit:
         specifier: ^5.0.5
         version: 5.0.5
       zod:
-        specifier: 4.6.5
-        version: 4.6.5
+        specifier: 4.6.7
+        version: 4.6.7
     devDependencies:
       '@types/node':
         specifier: ~26.6.3
@@ -497,26 +497,26 @@ packages:
   unstorage@2.0.0-alpha.10:
     resolution: {integrity: sha512-6h1veZp8gnp4dGllf0tDijoXxDYymJu251IpKKkrSVH+QHL6tXFbwG85KM+CBHSgpkkgtPuIiZ9oLCLP5+1Evw==}
 
-  zod@4.6.5:
-    resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
+  zod@4.6.7:
+    resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
 
 snapshots:
 
-  '@ai-sdk/gateway@4.0.102(zod@4.6.5)':
+  '@ai-sdk/gateway@4.0.102(zod@4.6.7)':
     dependencies:
       '@ai-sdk/provider': 4.0.21
-      '@ai-sdk/provider-utils': 5.0.53(zod@4.6.5)
+      '@ai-sdk/provider-utils': 5.0.53(zod@4.6.7)
       '@vercel/oidc': 3.2.0
-      zod: 4.6.5
+      zod: 4.6.7
 
-  '@ai-sdk/provider-utils@5.0.53(zod@4.6.5)':
+  '@ai-sdk/provider-utils@5.0.53(zod@4.6.7)':
     dependencies:
       '@ai-sdk/provider': 4.0.21
       '@standard-schema/spec': 1.1.0
       '@workflow/serde': 4.1.0
       eventsource-parser: 3.1.1
       undici: 7.29.1
-      zod: 4.6.5
+      zod: 4.6.7
 
   '@ai-sdk/provider@4.0.21':
     dependencies:
@@ -687,10 +687,10 @@ snapshots:
       '@octokit/request-error': 7.1.2
       '@octokit/webhooks-methods': 6.0.0
 
-  '@openrouter/ai-sdk-provider@3.1.0(ai@7.0.126(zod@4.6.5))(zod@4.6.5)':
+  '@openrouter/ai-sdk-provider@3.1.0(ai@7.0.126(zod@4.6.7))(zod@4.6.7)':
     dependencies:
-      ai: 7.0.126(zod@4.6.5)
-      zod: 4.6.5
+      ai: 7.0.126(zod@4.6.7)
+      zod: 4.6.7
 
   '@oxc-project/types@0.148.0': {}
 
@@ -784,12 +784,12 @@ snapshots:
 
   '@workflow/serde@4.1.0': {}
 
-  ai@7.0.126(zod@4.6.5):
+  ai@7.0.126(zod@4.6.7):
     dependencies:
-      '@ai-sdk/gateway': 4.0.102(zod@4.6.5)
+      '@ai-sdk/gateway': 4.0.102(zod@4.6.7)
       '@ai-sdk/provider': 4.0.21
-      '@ai-sdk/provider-utils': 5.0.53(zod@4.6.5)
-      zod: 4.6.5
+      '@ai-sdk/provider-utils': 5.0.53(zod@4.6.7)
+      zod: 4.6.7
 
   before-after-hook@4.0.0: {}
 
@@ -812,9 +812,9 @@ snapshots:
       httpxy: 0.5.5
       srvx: 1.0.4
 
-  eve@0.69.0(ai@7.0.126(zod@4.6.5)):
+  eve@0.69.0(ai@7.0.126(zod@4.6.7)):
     dependencies:
-      ai: 7.0.126(zod@4.6.5)
+      ai: 7.0.126(zod@4.6.7)
       nitro: 3.0.260903-beta
       undici: 8.10.2
 
@@ -917,4 +917,4 @@ snapshots:
 
   unstorage@2.0.0-alpha.10: {}
 
-  zod@4.6.5: {}
+  zod@4.6.7: {}
