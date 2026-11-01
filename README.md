@@ -10,7 +10,9 @@ pnpm dev          # local dev (loopback-only auth)
 pnpm typecheck
 ```
 
-Pushes to `main` publish the Docker image to Docker Hub. See [docs/deployment.md](docs/deployment.md) for the image, the Docker Compose setup and the reverse proxy requirements.
+CI (`.github/workflows/ci.yml`) runs `pnpm typecheck` and fails on any `eve info` diagnostics, on every pull request and push to `main`.
+
+Pushes to `main` also publish the Docker image to Docker Hub. See [docs/deployment.md](docs/deployment.md) for the image, the Docker Compose setup and the reverse proxy requirements.
 
 ## Channels
 
