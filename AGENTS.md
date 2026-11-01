@@ -8,6 +8,10 @@ This project uses the eve framework. Before writing code, always read the releva
 
 The agent framework the app is built on. It owns the runtime: channels (HTTP session API, Discord), tool registration, and the Node server build shipped as a Docker image (`Dockerfile`). The model is served via OpenRouter. Source lives under `agent/`; Guides are in `node_modules/eve/docs/`.
 
+### Discord Gateway relay
+
+Discord mentions, DMs and thread replies arrive only over the Gateway WebSocket, so `relay/main.ts` — eve's experimental `runDiscordGatewayRelay` — runs as a second container (`relay/Dockerfile`) and forwards them to the agent over HTTP. It is not part of the agent: it runs as plain `node` and installs from the root `package.json` and lockfile so its eve version always matches the agent's. Exactly one relay may run per bot. Leave the Discord channel's `onCommand`/`onAnswers`/`onMessage` hooks unset; the defaults are what keep approval buttons working.
+
 ### SQLite
 
 Memory lives in one SQLite file (`DATABASE_PATH`, default `./data/mike.db`) via Node's built-in `node:sqlite` — no native dependency, no extra service. `agent/lib/db.ts` owns the connection (lazy singleton, WAL), the schema and the shared search helpers. Schema changes go in as a new entry appended to its `MIGRATIONS` array; never edit an entry that has shipped, since `PRAGMA user_version` records which ones already ran.
@@ -21,11 +25,13 @@ agent/
 ├── agent.ts                 # model + context window
 ├── instructions.md          # static prompt
 ├── channels/                # discord, eve HTTP
+├── instrumentation/         # startup checks
 ├── tools/{github,memory}/
 └── lib/
     ├── {github,memory}/   # domain helpers
     ├── db.ts              # shared: connection, migrations, search helpers
     └── model-config.ts    # shared
+relay/                       # Discord Gateway relay (separate process + image)
 ```
 
 Code shared by two domains goes at the `lib/` root, not inside one of them — burying it makes one domain depend on another.
