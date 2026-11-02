@@ -1,15 +1,11 @@
 import { defineDynamic, defineInstructions } from "eve/instructions";
 import { historyChannelId, loadHistoryBlock } from "#lib/chat/history.js";
 
-export default defineDynamic({
-  events: {
-    // turn.started fires before message.received, so the current message is
-    // not yet in storage and cannot be replayed back as past conversation.
-    "turn.started"(_event, ctx) {
-      const channelId = historyChannelId(ctx.session.auth.current);
-      if (!channelId) return null;
-      const block = loadHistoryBlock(channelId);
-      return block ? defineInstructions({ markdown: block }) : null;
-    },
-  },
+export default defineDynamic(async (ctx) => {
+  if (!ctx.turn) return null;
+  const channelId = historyChannelId(ctx.session.auth.current);
+  if (!channelId) return null;
+  // Loaded once per turn so the prompt stays fixed across the turn's model calls.
+  const block = await ctx.memo(["chat-history", ctx.turn.id], () => loadHistoryBlock(channelId));
+  return block ? defineInstructions({ content: block }) : null;
 });
