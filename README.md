@@ -7,17 +7,34 @@ An [eve](https://eve.dev) agent app (model via OpenRouter), self-hosted as a Doc
 ```bash
 pnpm install
 pnpm dev          # local dev (loopback-only auth)
+pnpm relay        # Discord Gateway relay; set EVE_URL to the URL `pnpm dev` prints
 pnpm typecheck
 ```
 
 CI (`.github/workflows/ci.yml`) runs `pnpm typecheck` and fails on any `eve info` diagnostics, on every pull request and push to `main`.
 
-Pushes to `main` also publish the Docker image to Docker Hub. See [docs/deployment.md](docs/deployment.md) for the image, the Docker Compose setup and the reverse proxy requirements.
+Pushes to `main` also publish two Docker images to Docker Hub: the agent and the Discord Gateway relay. See [docs/deployment.md](docs/deployment.md) for the images, the Docker Compose setup, the reverse proxy requirements and the Discord setup.
+
+Run only one relay per bot, locally included: stop the production relay while you test against `pnpm dev`, or the bot answers twice.
 
 ## Channels
 
 - **eve** (`agent/channels/eve.ts`) — HTTP session API, open only under `pnpm dev` and closed in production; its public health route stays up.
-- **discord** (`agent/channels/discord.ts`) — slash commands at `POST /eve/v1/discord`. Set `DISCORD_PUBLIC_KEY`, `DISCORD_APPLICATION_ID`, `DISCORD_BOT_TOKEN` (see `.env.example`); point the app's Interactions Endpoint URL at that route.
+- **discord** (`agent/channels/discord.ts`) — `@mike` mentions, DMs and thread replies, forwarded by the relay to `POST /eve/v1/discord/gateway`. Button presses (approvals) still arrive at `POST /eve/v1/discord`, so the app's Interactions Endpoint URL stays pointed at that route. Set `DISCORD_PUBLIC_KEY`, `DISCORD_APPLICATION_ID`, `DISCORD_BOT_TOKEN` and `DISCORD_RELAY_SECRET` (see `.env.example`).
+
+### Talking to mike on Discord
+
+- `@mike <message>` in a text channel opens a public thread named after the message, adds you, and answers there. The thread is one conversation: follow up without mentioning the bot, and it remembers what was said earlier in the thread.
+- Two mentions open two threads that never share context.
+- DMs are answered in the DM, one conversation per DM.
+- Replying to any of the bot's messages continues that message's conversation.
+- Everything else is ignored, and the bot never answers bots, itself included.
+
+These are eve's defaults; the channel sets no `onCommand`, `onAnswers` or `onMessage` hook. That is deliberate: the defaults give a person the same identity for messages and button presses, so requester-only approvals keep working. The bot is not pinned to one server — keep **Public Bot** off in the Discord portal so only you can invite it.
+
+### Discord Gateway relay (`relay/main.ts`)
+
+Discord delivers ordinary messages only over its Gateway WebSocket, so a separate long-running process holds that connection and forwards each message to the agent over HTTP, authenticated with HTTP Basic using `DISCORD_RELAY_SECRET`. The agent refuses to start without that secret (`agent/instrumentation/require-relay-secret.ts`), so the Gateway route is never served unauthenticated. Gateway support is experimental in eve, so eve upgrades may require changes here.
 
 ## Tools
 
@@ -42,28 +59,6 @@ Persistent notes stored across conversations, one row per memory in the SQLite d
 
 Memory is global — shared across every channel and user.
 
-### Chat history (Discord only)
-
-Discord has no durable session per channel, so each `/mike` command would otherwise start blind. The runtime records both sides of every exchange, replays the most recent ones on the next turn, and lets the agent search older retained messages:
-
-- Written by `agent/hooks/chat-history.ts` on `turn.settled`: the user message, then the final reply when the turn completed (narration before tool calls is skipped, so only what the user actually saw is stored). Recording at settle keeps a turn's own message out of the history it replays. The Discord channel's auth attributes carry the invoking `username`, so entries name their speaker.
-- Replayed by `agent/instructions/chat-history.ts`, loaded once per turn, as a system block marked untrusted data. Only the newest slice is replayed; the rest remains available for search.
-- Searched by the `chat-search_history` tool using a case-insensitive substring of message text or author name. It returns the newest matches in chronological order, each as a snippet with author and timestamp, and searches only the current channel, resolved from verified auth. Total output is capped at 8000 characters.
-- Cleared by the `chat-clear_history` tool. It takes no arguments — the channel is resolved from verified auth, so a prompt injection cannot wipe another channel. It requires human approval on every call. The exchange that asked for the wipe is recorded after it, so a wipe leaves the channel holding that request and its confirmation.
-
-All logic lives in `agent/lib/chat/history.ts`; the hook, instructions, and tools are thin adapters. Retention is set by exported constants there: messages are kept for **90 days** (pruned on each insert); the newest **16** from the last **7 days** are replayed into the prompt, each clamped to **2000** characters when replayed. Full text is stored and searchable.
-
-Storage is one row per message in the `chat_messages` table, keyed by channel id. Inserts are atomic, so concurrent turns in the same channel never lose entries. Reads and writes are best-effort: a database error is logged to stderr and the bot answers without history rather than failing the turn.
-
 ## Storage
 
-Memory and chat history share one SQLite file at `DATABASE_PATH` (default `./data/mike.db`, gitignored; `/app/data/mike.db` in the Docker image, on the volume described in [docs/deployment.md](docs/deployment.md)), using Node's built-in `node:sqlite` — no native dependency and no separate service. `agent/lib/db.ts` opens it lazily in WAL mode and applies ordered migrations tracked via `PRAGMA user_version`. Search uses FTS5 with the `trigram` tokenizer (case-insensitive substring matching); queries shorter than 3 characters fall back to `LIKE`.
-
-## Register slash commands
-
-`scripts/register-commands.ts` registers the Discord slash commands (edit the `commands` array to change them). Each run `PUT`s, replacing the whole command set for that scope. Needs `DISCORD_APPLICATION_ID` + `DISCORD_BOT_TOKEN` (from `.env`).
-
-```bash
-pnpm discord:register              # global scope (~1h to propagate)
-pnpm discord:register <GUILD_ID>   # guild scope (instant)
-```
+Memory lives in one SQLite file at `DATABASE_PATH` (default `./data/mike.db`, gitignored; `/app/data/mike.db` in the Docker image, on the volume described in [docs/deployment.md](docs/deployment.md)), using Node's built-in `node:sqlite` — no native dependency and no separate service. `agent/lib/db.ts` opens it lazily in WAL mode and applies ordered migrations tracked via `PRAGMA user_version`. Search uses FTS5 with the `trigram` tokenizer (case-insensitive substring matching); queries shorter than 3 characters fall back to `LIKE`.

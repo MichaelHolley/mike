@@ -14,7 +14,7 @@
     "dev": "eve dev",
     "start": "eve start",
     "typecheck": "tsgo",
-    "discord:register": "node --env-file=.env scripts/register-commands.ts"
+    "relay": "node --env-file=.env relay/main.ts"
   },
   "dependencies": {
     "@openrouter/ai-sdk-provider": "^3.1.0",
