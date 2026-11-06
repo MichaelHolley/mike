@@ -11,7 +11,9 @@ pnpm relay        # Discord Gateway relay; set EVE_URL to the URL `pnpm dev` pri
 pnpm typecheck
 ```
 
-Pushes to `main` publish two Docker images to Docker Hub: the agent and the Discord Gateway relay. See [docs/deployment.md](docs/deployment.md) for the images, the Docker Compose setup, the reverse proxy requirements and the Discord setup.
+CI (`.github/workflows/ci.yml`) runs `pnpm typecheck` and fails on any `eve info` diagnostics, on every pull request and push to `main`.
+
+Pushes to `main` also publish two Docker images to Docker Hub: the agent and the Discord Gateway relay. See [docs/deployment.md](docs/deployment.md) for the images, the Docker Compose setup, the reverse proxy requirements and the Discord setup.
 
 Run only one relay per bot, locally included: stop the production relay while you test against `pnpm dev`, or the bot answers twice.
 
