@@ -7,17 +7,26 @@ Pushes to `main` publish two images to Docker Hub (`.github/workflows/publish.ym
 
 ## Docker Compose
 
+This example sits behind Traefik on an external `proxy` network; adapt the labels and network for another reverse proxy.
+
 ```yaml
 services:
   mike:
     image: <DOCKERHUB_USERNAME>/mike:latest
     restart: unless-stopped
-    ports:
-      - "3000:3000"
     env_file: stack.env # Portainer writes stack env vars here; see .env.example
     volumes:
       - workflow-data:/app/.eve/.workflow-data
       - data:/app/data
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.mike.rule=Host(`<your-host>`)
+      - traefik.http.routers.mike.entrypoints=websecure
+      - traefik.http.services.mike.loadbalancer.server.port=3000
+    networks:
+      - proxy
+      - default
 
   relay:
     image: <DOCKERHUB_USERNAME>/mike-relay:latest
@@ -32,11 +41,16 @@ services:
 volumes:
   workflow-data:
   data:
+
+networks:
+  proxy:
+    external: true
 ```
 
 - `/app/.eve/.workflow-data` holds durable run state; keep it on a named volume so in-flight runs survive container replacement. The container runs as `node` (uid 1000), so a bind-mounted host directory must be owned by it (`chown 1000:1000 <dir>`).
 - `/app/data` holds `mike.db`, the SQLite database with memory; keep it on its own volume so it survives container replacement. The same uid 1000 ownership applies to a bind mount.
 - Put the agent behind an HTTPS reverse proxy (Discord requires HTTPS) that forwards both `/eve/` and `/.well-known/workflow/` unchanged — runs stall if workflow callbacks can't reach the server. The relay reaches `/eve/v1/discord/gateway` over the internal Compose network, so the proxy doesn't need to expose that path; block it there if your proxy allows.
+- `mike` must stay on the stack's `default` network next to the relay, or the relay fails with `getaddrinfo EAI_AGAIN mike`. Being on two networks is why it needs `traefik.docker.network=proxy`: without it Traefik may route to the address it can't reach.
 - The agent's healthcheck probes the public `GET /eve/v1/health`.
 - The built-in `bash`, `read_file` and `write_file` tools are disabled (`agent/tools/{bash,read_file,write_file}.ts`), so the agent needs no sandbox and the image builds with `--skip-sandbox-prewarm`.
 
